@@ -1,3 +1,13 @@
+import { checkForRuleMatch } from './matchEngine';
+
+const tabOverrides = new Set();
+const systemMoves = new Set();
+
+const markSystemMove = (tabId) => {
+    systemMoves.add(tabId);
+    setTimeout(() => systemMoves.delete(tabId), 1000);
+}
+
 import debounce from 'lodash.debounce';
 import { localStorage, syncStorage } from './storageManager';
 
@@ -11,10 +21,6 @@ const clearAllWindowKeys = () => {
     localStorage.removeAll('window:');
 };
 
-function matchRuleShort(rule) {
-    var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-    return new RegExp(rule.split("*").map(escapeRegex).join(".*"));
-};
 
 const getGroupRules = async () => {
     const groupRules = await syncStorage.get('groupRules');
@@ -38,7 +44,7 @@ const getRuleForTabGroup = async (tabGroupId) => {
     return null;
 };
 
-const getAcidTabGroups = async (windowId = null) => {
+const getTabSenseGroups = async (windowId = null) => {
     const pattern = windowId ? `window:${windowId}:rule:.*:groupId` : `window:.*:rule:.*:groupId`
     const windowGroupEntries = await localStorage.getAll(pattern);
     return windowGroupEntries.map(([k, v]) => v) || [];
@@ -51,7 +57,7 @@ const updateTabGroups = async (args = {}) => {
         if (args.collapsed !== undefined) {
             collapsed = args.collapsed;
         }
-        const tabGroups = await getAcidTabGroups();
+        const tabGroups = await getTabSenseGroups();
         for (const tabGroupId of tabGroups) {
             try {
                 const group = await getTabGroup(tabGroupId)
@@ -71,14 +77,17 @@ const updateTabGroups = async (args = {}) => {
 
 const kickoutNonMatchingTabs = async () => {
     const window = await getCurrentWindow();
-    const tabGroups = await getAcidTabGroups();
+    const tabGroups = await getTabSenseGroups();
     const rules = await getGroupRules();
     const allTabs = await chrome.tabs.query({ windowId: window.id });
     for (const tabGroupId of tabGroups) {
         const tabsInGroup = allTabs.filter(t => t.groupId === tabGroupId)
         for (const tab of tabsInGroup) {
-            const rule = checkForRuleMatch(tab.url, rules) || null;
-            if (!rule) await chrome.tabs.ungroup(tab.id)
+            const rule = checkForRuleMatch(tab, rules) || null;
+            if (!rule) {
+                markSystemMove(tab.id);
+                await chrome.tabs.ungroup(tab.id)
+            }
         }
     }
 };
@@ -117,20 +126,6 @@ const assignAllTabsInWindow = async () => {
     alignTabs(window.id)
 }
 
-const checkForRuleMatch = (url, rules) => {
-    for (const rule of rules) {
-        const lineSplit = rule.pattern.split('\n');
-        const patterns = lineSplit
-            .reduce((prev, cur) => prev.concat(cur.split(' ')), [])
-            .filter(p => p.length)
-            .map(p => matchRuleShort(p.trim()));
-        for (const pattern of patterns) {
-            if (url.match(pattern)) return rule;
-        }
-    }
-    return null;
-}
-
 const clearOldWindowEntries = async () => {
     const allWindowEntries = await localStorage.getAll('window:.*:tabGroups');
     const windows = await chrome.windows.getAll();
@@ -149,6 +144,7 @@ const clearOldEntries = async () => {
         const tabs = await new Promise(resolve => chrome.tabs.query({}, resolve));
         const tabsStillInGroup = tabs.filter(t => t.groupId === groupId)
         for (const tab of tabsStillInGroup) {
+            markSystemMove(tab.id);
             await new Promise(resolve => chrome.tabs.ungroup(tab.id, resolve));
         }
     }
@@ -174,11 +170,13 @@ const getOrCreateTabGroup = async (windowId, tabId, existingGroupId) => {
     const createProperties = existingGroupId ? undefined : { windowId };
     let groupId;
     try {
+        markSystemMove(tabId);
         groupId = await chrome.tabs.group({ tabIds: tabId, groupId: existingGroupId, createProperties })
     } catch (e) {
         const isNoGroupError = e.message.startsWith('No group with id');
         if (isNoGroupError) {
             const createProperties = { windowId };
+            markSystemMove(tabId);
             groupId = await chrome.tabs.group({ tabIds: tabId, createProperties });
             return groupId
         }
@@ -213,11 +211,13 @@ const alignTabs = async (windowId) => {
 }
 
 const handleTab = async (tabId, retryCount = 3) => {
+    if (tabOverrides.has(tabId)) return;
+
     try {
         const tab = await chrome.tabs.get(tabId);
         const windowId = tab.windowId;
         const rules = await getGroupRules();
-        const rule = checkForRuleMatch(tab.url, rules) || null;
+        const rule = checkForRuleMatch(tab, rules) || null;
         if (rule && !tab.pinned) {
             const existingGroupId = await getGroupIdForRule(windowId, rule);
             const groupId = await getOrCreateTabGroup(windowId, tabId, existingGroupId);
@@ -227,9 +227,12 @@ const handleTab = async (tabId, retryCount = 3) => {
                 await setGroupIdForRule(rule, windowId, groupId)
             }
         } else {
-            const tabGroups = await getAcidTabGroups();
-            const inAcidTabGroup = tabGroups.includes(tab.groupId);
-            if (inAcidTabGroup) await chrome.tabs.ungroup(tab.id);
+            const tabGroups = await getTabSenseGroups();
+            const inTabSenseGroup = tabGroups.includes(tab.groupId);
+            if (inTabSenseGroup) {
+                markSystemMove(tab.id);
+                await chrome.tabs.ungroup(tab.id);
+            }
         }
     } catch (e) {
         // Extra retry logic for dealing with cases where a tab is still being dragged by user
@@ -249,7 +252,22 @@ chrome.webNavigation.onCommitted.addListener(async ({ tabId, url }) => {
     handleTab(tabId)
 })
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.groupId !== undefined) {
+        if (!systemMoves.has(tabId)) {
+            // This was a manual user move
+            tabOverrides.add(tabId);
+            return;
+        }
+    }
+
+    if (changeInfo.url) {
+        // If the URL changes, we might want to drop the override so rules can apply to the new page.
+        // If we want it to strictly persist across the session, we keep it. The spec says:
+        // "If the user manually moves a tab into a group, TabSense remembers and skips rules for that tab."
+        // We'll let it stay for the lifetime of the tab session as clarified.
+    }
+
     if (changeInfo.url || changeInfo.groupId == -1) {
         handleTab(tabId)
     }

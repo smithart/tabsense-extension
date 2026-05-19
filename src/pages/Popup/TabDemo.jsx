@@ -14,7 +14,7 @@ import TextField from '@material-ui/core/TextField';
 
 import './Popup.css';
 
-const ACID_GREEN = '#12FA73';
+const TABSENSE_GREEN = '#12FA73';
 const DARK_BLUE = '#282C34';
 
 const Wrapper = styled.div`
@@ -34,7 +34,7 @@ const Wrapper = styled.div`
   .icon {
     &:hover {
       cursor: pointer;
-      color: ${ACID_GREEN};
+      color: ${TABSENSE_GREEN};
     }
   }
     
@@ -74,7 +74,7 @@ const Row = styled.div`
 const Icon = styled.div`
   cursor: pointer;
   &:hover {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
   ${props => props.disabled && css`
@@ -252,7 +252,7 @@ const TabDemo = (props) => {
         <FillColumn>
         <ExampleWrapper>
             <Prompt>
-            Acid Tabs lets you automatically <span style={{ color: COLORS.blue, textDecoration: 'underline' }}>group</span> your tabs with url patterns
+            TabSense lets you automatically <span style={{ color: COLORS.blue, textDecoration: 'underline' }}>group</span> your tabs with url patterns
             </Prompt>
             <FakeTabsRow>
                 {tabs.map(t => (

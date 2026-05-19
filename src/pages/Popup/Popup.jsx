@@ -17,7 +17,7 @@ const theme = createMuiTheme({
 });
 
 const DARK_BLUE = '#282C34';
-const ACID_GREEN = '#12FA73';
+const TABSENSE_GREEN = '#12FA73';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -47,11 +47,11 @@ const Wrapper = styled.div`
   }
 
   .MuiTab-textColorPrimary.Mui-selected {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
   .MuiTabs-indicator {
-    background-color: ${ACID_GREEN};
+    background-color: ${TABSENSE_GREEN};
   }
 `
 
@@ -63,11 +63,11 @@ const ContentWrapper = styled.div`
 `;
 
 const initialRules = [
-  { key: 0, name: 'mail', pattern: 'mail.google.com outlook.com https://mail.*', color: 'grey' },
-  { key: 1, name: 'google', pattern: 'google.com', color: 'blue' },
-  { key: 2, name: 'social', pattern: 'twitter.com instagram.com linkedin.com', color: 'yellow' },
-  { key: 3, name: 'entertainment', pattern: 'reddit.com youtube.com pinterest.com', color: 'purple' },
-  { key: 4, name: 'news', pattern: 'news.*', color: 'green' },
+  { key: 0, name: 'mail', patterns: ['mail.google.com', 'outlook.com', 'https://mail.*'], color: 'grey' },
+  { key: 1, name: 'google', patterns: ['google.com'], color: 'blue' },
+  { key: 2, name: 'social', patterns: ['twitter.com', 'instagram.com', 'linkedin.com'], color: 'yellow' },
+  { key: 3, name: 'entertainment', patterns: ['reddit.com', 'youtube.com', 'pinterest.com'], color: 'purple' },
+  { key: 4, name: 'news', patterns: ['news.*'], color: 'green' },
 ]
 
 const rule = (key = 0, pattern = '', name = 'rule') => ({ key, pattern, name })
@@ -95,7 +95,13 @@ const Popup = () => {
   const [hasConfirmed, setHasConfirmed] = useState(false);
 
   useEffect(async () => {
-    const groupRules = await syncStorage.get('groupRules');
+    let groupRules = await syncStorage.get('groupRules');
+    if (groupRules) {
+      groupRules = groupRules.map(r => ({
+        ...r,
+        pattern: (r.patterns || [r.pattern || '']).join(' ')
+      }));
+    }
     const hasConfirmed = await syncStorage.get('hasConfirmed');
     setHasConfirmed(hasConfirmed)
     setGroupRules(groupRules || [])
@@ -110,6 +116,8 @@ const Popup = () => {
 
   const saveGroupRules = async (rules, shouldRefresh = false) => {
     const rulesWithIds = rules.map((r) => {
+      r.patterns = (r.pattern || '').split(/\s+/).filter(p => p.length > 0);
+      r.enabled = r.enabled !== false;
       if (r.id) return r;
       r.id = getRandomInt(100000);
       return r;

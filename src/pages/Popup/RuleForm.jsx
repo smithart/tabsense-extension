@@ -5,6 +5,9 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DoneIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
+import SettingsIcon from '@material-ui/icons/Settings';
+import PublishIcon from '@material-ui/icons/Publish'; // Import
+import GetAppIcon from '@material-ui/icons/GetApp'; // Export
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import EditIcon from '@material-ui/icons/Edit';
@@ -30,10 +33,10 @@ import TextField from '@material-ui/core/TextField';
 import './Popup.css';
 import EmojiModal from './EmojiModal';
 
-const ACID_GREEN = '#12FA73';
-const ACID_ORANGE = '#fa7312';
-const ACID_RED = '#fb4453';
-const ACID_PURPLE = '#7312fa';
+const TABSENSE_GREEN = '#12FA73';
+const TABSENSE_ORANGE = '#fa7312';
+const TABSENSE_RED = '#fb4453';
+const TABSENSE_PURPLE = '#7312fa';
 const DARK_BLUE = '#282C34';
 
 const Wrapper = styled.div`
@@ -71,11 +74,11 @@ const Wrapper = styled.div`
   .icon {
     &:hover {
       cursor: pointer;
-      color: ${ACID_GREEN};
+      color: ${TABSENSE_GREEN};
     }
 
     &--delete:hover {
-      color: ${ACID_RED};
+      color: ${TABSENSE_RED};
     }
   }
     
@@ -153,7 +156,7 @@ const Icon = styled.div`
   cursor: pointer;
   color: #f1f1f1;
   &:hover {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
   ${props => props.disabled && css`
@@ -238,17 +241,17 @@ const getAll = (ptrn) => {
   })
 };
 
-const getAcidTabGroups = async (windowId = null) => {
+const getTabSenseGroups = async (windowId = null) => {
   const pattern = windowId ? `window:${windowId}:rule:.*:groupId` : `window:.*:rule:.*:groupId`
   const windowGroupEntries = await getAll(pattern);
   return windowGroupEntries.map(([k, v]) => v) || [];
 };
 
-const isAnyAcidTabGroupCollapsed = async () => {
+const isAnyTabSenseGroupCollapsed = async () => {
   if (!chrome.tabGroups) return false;
-  const acidTabGroups = await getAcidTabGroups();
+  const tabSenseGroups = await getTabSenseGroups();
   const rawTabGroups = await new Promise(resolve => chrome.tabGroups.query({}, resolve));
-  const managedTabGroups = rawTabGroups.filter(tg => acidTabGroups.some(t => t === tg.id))
+  const managedTabGroups = rawTabGroups.filter(tg => tabSenseGroups.some(t => t === tg.id))
   const collapsedGroups = managedTabGroups.filter(tg => tg.collapsed)
   return collapsedGroups.length > 0;
 }
@@ -258,6 +261,51 @@ const TAB_BORDER_COLOR = '#9a9a9a';
 const ruleToText = rule => `${rule.name}, ${rule.pattern.replace('\n', '   ')}${rule.color ? ', ' + rule.color : ''}`
 
 const RuleForm = (props) => {
+  const fileInputRef = useRef(null);
+
+  const handleExport = () => {
+    const rulesToExport = {
+      version: "1.0",
+      rules: formik.values.groupRules.map(r => ({
+        name: r.name,
+        patterns: (r.pattern || '').split(/\s+/).filter(p => p.length > 0),
+        color: r.color,
+        priority: r.key
+      }))
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rulesToExport, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "tabsense-rules.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        if (json && json.rules && Array.isArray(json.rules)) {
+           const newRules = json.rules.map((r, i) => ({
+             key: r.priority !== undefined ? r.priority : i,
+             name: r.name || '',
+             pattern: r.patterns ? r.patterns.join(' ') : '',
+             color: r.color || getNewColor()
+           }));
+           formik.setFieldValue('groupRules', newRules);
+           saveGroupRules(newRules);
+        }
+      } catch (err) {
+        console.error("Import failed", err);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const { groupRules, saveGroupRules, handleUpdate, handleCollapseGroups, showConfirm, handleConfirm } = props;
   const [isDirty, setIsDirty] = useState(false);
   const [isBulkMode, setIsBulkMode] = useState(false);
@@ -352,7 +400,7 @@ const RuleForm = (props) => {
   }
 
   const updateCollapsed = async () => {
-    const newIsCollapsed = await isAnyAcidTabGroupCollapsed();
+    const newIsCollapsed = await isAnyTabSenseGroupCollapsed();
     setIsCollapsed(newIsCollapsed);
   }
 
@@ -440,6 +488,18 @@ const RuleForm = (props) => {
       />
       <br />
       <form onSubmit={formik.handleSubmit}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '1rem', paddingTop: '0.5rem' }}>
+          <Tooltip title="Settings">
+             <SettingsIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} />
+          </Tooltip>
+          <Tooltip title="Export Rules">
+             <GetAppIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} onClick={handleExport} />
+          </Tooltip>
+          <Tooltip title="Import Rules">
+             <PublishIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} onClick={() => fileInputRef.current.click()} />
+          </Tooltip>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleImport} />
+        </div>
         {/* <Icon style={{ position: 'absolute' }}><ArrowBackIcon /></Icon> */}
         {formik.values.groupRules.length === 0 && (
           <FillColumn style={{ justifyContent: 'center', fontSize: '1.1rem' }}>

@@ -16,13 +16,13 @@ import TextField from '@material-ui/core/TextField';
 
 import './Popup.css';
 
-const ACID_GREEN = '#12FA73';
+const TABSENSE_GREEN = '#12FA73';
 const DARK_BLUE = '#282C34';
 
 const Icon = styled.div`
   cursor: pointer;
   &:hover {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
   ${props => props.disabled && css`
