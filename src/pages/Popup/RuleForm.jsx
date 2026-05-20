@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import styled, { css } from 'styled-components';
-import formik, { Formik, Field, Form, useFormik, FieldArray } from "formik";
+import formik, { Formik, Field, Form, useFormik, FieldArray } from 'formik';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DoneIcon from '@material-ui/icons/Check';
@@ -12,8 +12,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import EditIcon from '@material-ui/icons/Edit';
 
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import SortIcon from '@material-ui/icons/Sort';
@@ -22,10 +22,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Fab from '@material-ui/core/Fab';
 import Tooltip from '@material-ui/core/Tooltip';
 import Draggable, { DraggableCore } from 'react-draggable'; // Both at the same time
-import { COLORS } from '../Colors'
+import { COLORS } from '../Colors';
 
 import TabDemo from './TabDemo';
-
 
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -44,9 +43,8 @@ const Wrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  
+
   form {
-    
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
@@ -62,7 +60,7 @@ const Wrapper = styled.div`
     margin-left: 6.5rem;
     padding-bottom: 0.5rem;
     z-index: 10;
-    color: #626C7F;
+    color: #626c7f;
 
     &:hover {
       cursor: pointer;
@@ -81,33 +79,30 @@ const Wrapper = styled.div`
       color: ${TABSENSE_RED};
     }
   }
-    
-  .icon.disabled {
 
-    &:hover{
+  .icon.disabled {
+    &:hover {
       cursor: initial;
       color: inherit;
     }
   }
-
-  
 
   .MuiButton-root.expandable {
     justify-content: flex-start;
 
     .MuiButton-label > div {
       overflow: hidden;
-        transition: max-width 150ms;
-        white-space: nowrap;
-        text-align: left;
-        max-width: 0;
+      transition: max-width 150ms;
+      white-space: nowrap;
+      text-align: left;
+      max-width: 0;
     }
   }
 
   .MuiButton-root.expandable:hover {
     .MuiButton-label > div {
-        max-width: 10rem;
-      }
+      max-width: 10rem;
+    }
   }
 
   .bottom-row {
@@ -128,7 +123,7 @@ const Wrapper = styled.div`
   .moving--up {
     transform: translate(0, -2rem);
   }
-  
+
   .moving--down {
     transform: translate(0, 2rem);
   }
@@ -142,15 +137,14 @@ const Wrapper = styled.div`
       display: none;
     }
   }
-`
+`;
 
 const PreCol = styled.div`
   width: 6rem;
-`
+`;
 const PostCol = styled.div`
   width: 12rem;
-`
-
+`;
 
 const Icon = styled.div`
   cursor: pointer;
@@ -159,70 +153,76 @@ const Icon = styled.div`
     color: ${TABSENSE_GREEN};
   }
 
-  ${props => props.disabled && css`
-    cursor: initial;
+  ${(props) =>
+    props.disabled &&
+    css`
+      cursor: initial;
 
-    &:hover{
-      color: inherit;
-    }
-  `}
-`
+      &:hover {
+        color: inherit;
+      }
+    `}
+`;
 
 const Row = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: ${props => props.alignItems || 'center'};
-  justify-content: ${props => props.justifyContent || 'initial'};
-  padding: ${props => props.padding || '0'};
+  align-items: ${(props) => props.alignItems || 'center'};
+  justify-content: ${(props) => props.justifyContent || 'initial'};
+  padding: ${(props) => props.padding || '0'};
 
-  ${(props) => !props.alwaysShow && css`
-    svg {
-      opacity: 0;
-      transition: opacity 100ms;
-    }
-
-    &:hover {
+  ${(props) =>
+    !props.alwaysShow &&
+    css`
       svg {
-        opacity: 1;
+        opacity: 0;
+        transition: opacity 100ms;
       }
 
-      .icon.disabled {
-        opacity: 0.2;
+      &:hover {
+        svg {
+          opacity: 1;
+        }
+
+        .icon.disabled {
+          opacity: 0.2;
+        }
       }
-    }
-  `}
-`
+    `}
+`;
 
 const ColorCircle = styled.div`
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 0.125rem;
-  background-color: ${props => props.value || 'initial'};
+  background-color: ${(props) => props.value || 'initial'};
   :after {
-      content:"";
+    content: '';
   }
 
-  
+  ${(props) =>
+    props.displayMode &&
+    css`
+      margin-top: 0.4rem;
+      margin-left: 0.4rem;
 
-  ${props => props.displayMode && css`
-    margin-top: 0.4rem;
-    margin-left: 0.4rem;
-
-    ${props => !props.value && css`
-      border: 1px solid #FDFDFD;
-      opacity: 0.25;
+      ${(props) =>
+        !props.value &&
+        css`
+          border: 1px solid #fdfdfd;
+          opacity: 0.25;
+        `}
     `}
-  `}
-`
+`;
 const FillColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   height: 100%;
-`
+`;
 
 const getAll = (ptrn) => {
   return new Promise((resolve) => {
@@ -236,13 +236,14 @@ const getAll = (ptrn) => {
           resolve(Object.entries(data));
         }
       }
-
     });
-  })
+  });
 };
 
 const getTabSenseGroups = async (windowId = null) => {
-  const pattern = windowId ? `window:${windowId}:rule:.*:groupId` : `window:.*:rule:.*:groupId`
+  const pattern = windowId
+    ? `window:${windowId}:rule:.*:groupId`
+    : `window:.*:rule:.*:groupId`;
   const windowGroupEntries = await getAll(pattern);
   return windowGroupEntries.map(([k, v]) => v) || [];
 };
@@ -250,33 +251,42 @@ const getTabSenseGroups = async (windowId = null) => {
 const isAnyTabSenseGroupCollapsed = async () => {
   if (!chrome.tabGroups) return false;
   const tabSenseGroups = await getTabSenseGroups();
-  const rawTabGroups = await new Promise(resolve => chrome.tabGroups.query({}, resolve));
-  const managedTabGroups = rawTabGroups.filter(tg => tabSenseGroups.some(t => t === tg.id))
-  const collapsedGroups = managedTabGroups.filter(tg => tg.collapsed)
+  const rawTabGroups = await new Promise((resolve) =>
+    chrome.tabGroups.query({}, resolve)
+  );
+  const managedTabGroups = rawTabGroups.filter((tg) =>
+    tabSenseGroups.some((t) => t === tg.id)
+  );
+  const collapsedGroups = managedTabGroups.filter((tg) => tg.collapsed);
   return collapsedGroups.length > 0;
-}
+};
 
 const TAB_BORDER_COLOR = '#9a9a9a';
 
-const ruleToText = rule => `${rule.name}, ${rule.pattern.replace('\n', '   ')}${rule.color ? ', ' + rule.color : ''}`
+const ruleToText = (rule) =>
+  `${rule.name}, ${rule.pattern.replace('\n', '   ')}${
+    rule.color ? ', ' + rule.color : ''
+  }`;
 
 const RuleForm = (props) => {
   const fileInputRef = useRef(null);
 
   const handleExport = () => {
     const rulesToExport = {
-      version: "1.0",
-      rules: formik.values.groupRules.map(r => ({
+      version: '1.0',
+      rules: formik.values.groupRules.map((r) => ({
         name: r.name,
-        patterns: (r.pattern || '').split(/\s+/).filter(p => p.length > 0),
+        patterns: (r.pattern || '').split(/\s+/).filter((p) => p.length > 0),
         color: r.color,
-        priority: r.key
-      }))
+        priority: r.key,
+      })),
     };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rulesToExport, null, 2));
+    const dataStr =
+      'data:text/json;charset=utf-8,' +
+      encodeURIComponent(JSON.stringify(rulesToExport, null, 2));
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "tabsense-rules.json");
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute('download', 'tabsense-rules.json');
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -290,26 +300,35 @@ const RuleForm = (props) => {
       try {
         const json = JSON.parse(e.target.result);
         if (json && json.rules && Array.isArray(json.rules)) {
-           const newRules = json.rules.map((r, i) => ({
-             key: r.priority !== undefined ? r.priority : i,
-             name: r.name || '',
-             pattern: r.patterns ? r.patterns.join(' ') : '',
-             color: r.color || getNewColor()
-           }));
-           formik.setFieldValue('groupRules', newRules);
-           saveGroupRules(newRules);
+          const newRules = json.rules.map((r, i) => ({
+            key: r.priority !== undefined ? r.priority : i,
+            name: r.name || '',
+            pattern: r.patterns ? r.patterns.join(' ') : '',
+            color: r.color || getNewColor(),
+          }));
+          formik.setFieldValue('groupRules', newRules);
+          saveGroupRules(newRules);
         }
       } catch (err) {
-        console.error("Import failed", err);
+        console.error('Import failed', err);
       }
     };
     reader.readAsText(file);
   };
 
-  const { groupRules, saveGroupRules, handleUpdate, handleCollapseGroups, showConfirm, handleConfirm } = props;
+  const {
+    groupRules,
+    saveGroupRules,
+    handleUpdate,
+    handleCollapseGroups,
+    showConfirm,
+    handleConfirm,
+  } = props;
   const [isDirty, setIsDirty] = useState(false);
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [bulkValue, setBulkValue] = useState(groupRules.map(ruleToText).join('\n'));
+  const [bulkValue, setBulkValue] = useState(
+    groupRules.map(ruleToText).join('\n')
+  );
   const [newestRule, setNewestRule] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showBottomRow, setShowBottomRow] = useState(false);
@@ -318,43 +337,50 @@ const RuleForm = (props) => {
 
   const formik = useFormik({
     initialValues: {
-      groupRules
+      groupRules,
     },
     onSubmit: (values) => {
-      saveGroupRules(values.groupRules)
+      saveGroupRules(values.groupRules);
     },
   });
 
   const removeRule = (index) => {
-    formik.values.groupRules.splice(index, 1)
+    formik.values.groupRules.splice(index, 1);
     formik.setFieldValue(formik.values.groupRules);
     setIsDirty(true);
-    saveGroupRules(formik.values.groupRules)
-  }
+    saveGroupRules(formik.values.groupRules);
+  };
 
   const updateRuleOrder = (index, change) => {
     const otherIndex = index + change;
-    setMovedRule({ [index]: change > 0 ? 'down' : 'up' })
+    setMovedRule({ [index]: change > 0 ? 'down' : 'up' });
     setTimeout(() => {
       formik.values.groupRules[index].key = otherIndex;
       formik.values.groupRules[otherIndex].key = index;
-      formik.setFieldValue(formik.values.groupRules.sort((a, b) => a.key - b.key));
-      setIsDirty(true)
-      setMovedRule({})
-      saveGroupRules(formik.values.groupRules)
-    }, 100)
-  }
+      formik.setFieldValue(
+        formik.values.groupRules.sort((a, b) => a.key - b.key)
+      );
+      setIsDirty(true);
+      setMovedRule({});
+      saveGroupRules(formik.values.groupRules);
+    }, 100);
+  };
 
   const getNewColor = () => {
-    const colorCounts = Object.keys(COLORS).reduce((curr, prev) => ({ ...curr, [prev]: 0 }), {})
+    const colorCounts = Object.keys(COLORS).reduce(
+      (curr, prev) => ({ ...curr, [prev]: 0 }),
+      {}
+    );
     formik.values.groupRules
-      .filter(rule => rule.color && Number.isInteger(colorCounts[rule.color]))
-      .forEach(rule => { colorCounts[rule.color] = colorCounts[rule.color] + 1 });
+      .filter((rule) => rule.color && Number.isInteger(colorCounts[rule.color]))
+      .forEach((rule) => {
+        colorCounts[rule.color] = colorCounts[rule.color] + 1;
+      });
     const colorsSortedByUse = Object.entries(colorCounts)
       .sort((a, b) => a[1] - b[1])
-      .map(c => c[0]);
+      .map((c) => c[0]);
     return colorsSortedByUse[0];
-  }
+  };
 
   const addNewRule = () => {
     const newRule = {
@@ -362,47 +388,60 @@ const RuleForm = (props) => {
       pattern: '',
       key: formik.values.groupRules.length,
       color: getNewColor(),
-    }
+    };
     formik.setFieldValue(formik.values.groupRules.push(newRule));
-    setNewestRule(formik.values.groupRules.length)
+    setNewestRule(formik.values.groupRules.length);
   };
 
   const handleEmojiSelection = (index, emoji) => {
-    formik.values.groupRules[index].name = emoji + ' ' + formik.values.groupRules[index].name;
+    formik.values.groupRules[index].name =
+      emoji + ' ' + formik.values.groupRules[index].name;
     setShowEmojiRow(null);
     setIsDirty(true);
     saveGroupRules(formik.values.groupRules);
   };
 
-  const allowUp = index => index > 0;
-  const allowDown = index => index < (formik.values.groupRules && formik.values.groupRules.length - 1);
-  const allValid = formik.values.groupRules.every(rule => rule.name.length > 0 && rule.pattern.length > 0)
+  const allowUp = (index) => index > 0;
+  const allowDown = (index) =>
+    index < (formik.values.groupRules && formik.values.groupRules.length - 1);
+  const allValid = formik.values.groupRules.every(
+    (rule) => rule.name.length > 0 && rule.pattern.length > 0
+  );
   const changed = formik.dirty || isDirty;
 
   const textToRules = (rawText) => {
     const lines = rawText.split('\n');
-    const rules = lines.map((line, i) => lineToRule(line, i)).filter(r => !!r)
+    const rules = lines
+      .map((line, i) => lineToRule(line, i))
+      .filter((r) => !!r);
     return rules;
-  }
+  };
   const lineToRule = (text, key) => {
-    const fields = text.split(',').map(f => f.replace('   ', '\n').trim())
+    const fields = text.split(',').map((f) => f.replace('   ', '\n').trim());
     if (text.trim().length === 0) return null;
-    if (fields.length < 2 || fields.length > 3 || fields.slice(0, 2).some(f => f.length === 0)) {
-      return { error: 'Invalid format' }
+    if (
+      fields.length < 2 ||
+      fields.length > 3 ||
+      fields.slice(0, 2).some((f) => f.length === 0)
+    ) {
+      return { error: 'Invalid format' };
     }
-    const color = fields.length > 2 && Object.keys(COLORS).includes(fields[2]) ? fields[2] : getNewColor();
-    return { key, name: fields[0], pattern: fields[1], color }
-  }
+    const color =
+      fields.length > 2 && Object.keys(COLORS).includes(fields[2])
+        ? fields[2]
+        : getNewColor();
+    return { key, name: fields[0], pattern: fields[1], color };
+  };
 
   const handleCollapse = (state) => {
-    setIsCollapsed(state)
-    handleCollapseGroups(state)
-  }
+    setIsCollapsed(state);
+    handleCollapseGroups(state);
+  };
 
   const updateCollapsed = async () => {
     const newIsCollapsed = await isAnyTabSenseGroupCollapsed();
     setIsCollapsed(newIsCollapsed);
-  }
+  };
 
   const toggleCollapseListener = async (command) => {
     if (command === 'toggle-collapse') {
@@ -412,17 +451,18 @@ const RuleForm = (props) => {
 
   useEffect(() => {
     if (allValid) {
-      saveGroupRules(formik.values.groupRules)
-      setBulkValue(formik.values.groupRules.map(ruleToText).join('\n'))
+      saveGroupRules(formik.values.groupRules);
+      setBulkValue(formik.values.groupRules.map(ruleToText).join('\n'));
     }
-  }, [formik.values.groupRules])
+  }, [formik.values.groupRules]);
 
   useEffect(() => {
     updateCollapsed();
-    setTimeout(() => setShowBottomRow(true), 10)
+    setTimeout(() => setShowBottomRow(true), 10);
     chrome.commands.onCommand.addListener(toggleCollapseListener);
-    return () => chrome.commands.onCommand.removeListener(toggleCollapseListener);
-  }, [])
+    return () =>
+      chrome.commands.onCommand.removeListener(toggleCollapseListener);
+  }, []);
 
   if (showConfirm) {
     return <TabDemo onConfirm={handleConfirm} />;
@@ -430,12 +470,12 @@ const RuleForm = (props) => {
 
   if (isBulkMode) {
     const parsedRules = textToRules(bulkValue);
-    const isBulkValid = parsedRules.every(r => !r.error)
+    const isBulkValid = parsedRules.every((r) => !r.error);
     const confirmBulk = (rules) => {
       if (!isBulkValid) return;
-      saveGroupRules(parsedRules, true)
-      setIsBulkMode(false)
-    }
+      saveGroupRules(parsedRules, true);
+      setIsBulkMode(false);
+    };
     return (
       <Wrapper style={{ marginTop: '1rem', padding: '0 1rem' }}>
         <TextField
@@ -446,17 +486,27 @@ const RuleForm = (props) => {
           value={bulkValue}
           error={!isBulkValid}
           multiline
-          placeholder='name, pattern'
+          placeholder="name, pattern"
           onChange={(e) => setBulkValue(e.target.value)}
         />
-        <Row style={{ flex: 10, marginTop: '1rem', marginBottom: '1rem' }} alignItems='flex-end' justifyContent='center' alwaysShow>
-          <Button disabled={!isBulkValid} variant='contained' color="primary" onClick={confirmBulk}>
+        <Row
+          style={{ flex: 10, marginTop: '1rem', marginBottom: '1rem' }}
+          alignItems="flex-end"
+          justifyContent="center"
+          alwaysShow
+        >
+          <Button
+            disabled={!isBulkValid}
+            variant="contained"
+            color="primary"
+            onClick={confirmBulk}
+          >
             <DoneIcon style={{ paddingRight: '0.5rem' }} />
             Confirm
           </Button>
         </Row>
       </Wrapper>
-    )
+    );
   }
 
   const getMove = (i) => {
@@ -464,18 +514,17 @@ const RuleForm = (props) => {
       return movedRule[i];
     }
 
-
     if (movedRule[i - 1] == 'down') {
       if (i === 1) return 'fade';
-      return 'up'
+      return 'up';
     }
     if (movedRule[i + 1] == 'up') {
       if (i === 0) return 'fade';
-      return 'down'
+      return 'down';
     }
-  }
+  };
 
-  const indirectlyMoved = i => getMove(i) && !movedRule[i];
+  const indirectlyMoved = (i) => getMove(i) && !movedRule[i];
 
   const shouldShowLabel = (i) => i === 0;
 
@@ -484,22 +533,55 @@ const RuleForm = (props) => {
       <EmojiModal
         open={showEmojiRow != null}
         handleClose={() => setShowEmojiRow(null)}
-        handleEmojiSelection={(emoji) => handleEmojiSelection(showEmojiRow, emoji)}
+        handleEmojiSelection={(emoji) =>
+          handleEmojiSelection(showEmojiRow, emoji)
+        }
       />
-      <br />
-      <form onSubmit={formik.handleSubmit}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '1rem', paddingTop: '0.5rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0.5rem 1rem 0',
+        }}
+      >
+        <img
+          src="../../assets/img/icon-34.png"
+          alt="TabSense Logo"
+          style={{ height: '34px' }}
+        />
+        <div style={{ display: 'flex' }}>
           <Tooltip title="Settings">
-             <SettingsIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} />
+            <SettingsIcon
+              className="icon"
+              style={{ marginLeft: '0.5rem', color: 'grey' }}
+            />
           </Tooltip>
           <Tooltip title="Export Rules">
-             <GetAppIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} onClick={handleExport} />
+            <GetAppIcon
+              className="icon"
+              style={{ marginLeft: '0.5rem', color: 'grey' }}
+              onClick={handleExport}
+            />
           </Tooltip>
           <Tooltip title="Import Rules">
-             <PublishIcon className="icon" style={{ marginLeft: '0.5rem', color: 'grey' }} onClick={() => fileInputRef.current.click()} />
+            <PublishIcon
+              className="icon"
+              style={{ marginLeft: '0.5rem', color: 'grey' }}
+              onClick={() => fileInputRef.current.click()}
+            />
           </Tooltip>
-          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleImport} />
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept=".json"
+            onChange={handleImport}
+          />
         </div>
+      </div>
+      <br />
+      <form onSubmit={formik.handleSubmit}>
         {/* <Icon style={{ position: 'absolute' }}><ArrowBackIcon /></Icon> */}
         {formik.values.groupRules.length === 0 && (
           <FillColumn style={{ justifyContent: 'center', fontSize: '1.1rem' }}>
@@ -507,57 +589,106 @@ const RuleForm = (props) => {
             No rules yet, add one to start!
           </FillColumn>
         )}
-        {/* {formik.values.groupRules.length > 0 && (
-          <Row className={'special-hide'} key={'null'} alignItems='flex-end' style={{ paddingLeft: '1rem', boxSizing: 'border-box' }}>
+        {formik.values.groupRules.length > 0 && (
+          <Row
+            className={'special-hide'}
+            key={'null'}
+            alignItems="flex-end"
+            style={{
+              paddingLeft: '1rem',
+              boxSizing: 'border-box',
+              opacity: 0.8,
+              pointerEvents: 'none',
+              marginBottom: '-1rem',
+            }}
+          >
+            <svg
+              className="reaction"
+              style={{ opacity: 0 }}
+              transform="scale(1.25, 1.25)"
+              viewBox="0 0 16 16"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12 1h-1v3H8v1h3v3h1V5h3V4h-3V1z"
+              />
+            </svg>
             <TextField
               style={{ minWidth: '8rem' }}
               key={`groupRules.${0}.name`}
               name={`groupRules.${0}.name`}
-              label={shouldShowLabel(0) ? "Name" : null}
-              value
-              required
-              placeholder='Group Name'
+              label="Name"
+              value=""
+              placeholder=""
             />
             <TextField
               fullWidth
               key={`groupRules.${0}.pattern`}
               name={`groupRules.${0}.pattern`}
-              label={shouldShowLabel(0) ? "URL Pattern (space separated for multiple)" : null}
-              required
-              multiline
-              placeholder='URL Pattern ("google.com")'
+              label="URL Pattern (space separated for multiple)"
+              value=""
+              placeholder=""
             />
             <Select
+              style={{ opacity: 0 }}
               key={`groupRules.${0}.color`}
               name={`groupRules.${0}.color`}
               displayEmpty
-            >
-              {Object.entries(COLORS).map(([colorKey, colorVal]) => (
-                <MenuItem value={colorKey}><ColorCircle value={colorVal} /></MenuItem>
-              ))}
-            </Select>
+            ></Select>
+            <PostCol style={{ opacity: 0 }}></PostCol>
           </Row>
-        )} */}
+        )}
         {formik.values.groupRules.map((groupRule, i) => (
-          <Row className={getMove(i) ? `moving moving--${getMove(i)} ${indirectlyMoved(i) ? 'moving--indirect' : ''}` : ''} key={groupRule.key || '0'} alignItems='flex-end' style={{ paddingLeft: '1rem', boxSizing: 'border-box' }}>
-            <svg className="reaction" onClick={() => setShowEmojiRow(i)} transform="scale(1.25, 1.25)" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 1h-1v3H8v1h3v3h1V5h3V4h-3V1zM6 4.022A5.5 5.5 0 1 0 11.978 10h-1.005A4.5 4.5 0 1 1 6 5.027V4.022zM4.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm2 2.5c.712 0 1.355-.298 1.81-.776l.707.708A3.49 3.49 0 0 1 6.5 12.5a3.49 3.49 0 0 1-2.555-1.108l.708-.708A2.493 2.493 0 0 0 6.5 11.5zm2-2.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" /></svg>
+          <Row
+            className={
+              getMove(i)
+                ? `moving moving--${getMove(i)} ${
+                    indirectlyMoved(i) ? 'moving--indirect' : ''
+                  }`
+                : ''
+            }
+            key={groupRule.key || '0'}
+            alignItems="flex-end"
+            style={{ paddingLeft: '1rem', boxSizing: 'border-box' }}
+          >
+            <svg
+              className="reaction"
+              onClick={() => setShowEmojiRow(i)}
+              transform="scale(1.25, 1.25)"
+              viewBox="0 0 16 16"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12 1h-1v3H8v1h3v3h1V5h3V4h-3V1zM6 4.022A5.5 5.5 0 1 0 11.978 10h-1.005A4.5 4.5 0 1 1 6 5.027V4.022zM4.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm2 2.5c.712 0 1.355-.298 1.81-.776l.707.708A3.49 3.49 0 0 1 6.5 12.5a3.49 3.49 0 0 1-2.555-1.108l.708-.708A2.493 2.493 0 0 0 6.5 11.5zm2-2.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+              />
+            </svg>
             <TextField
               style={{ minWidth: '8rem' }}
               key={`groupRules.${i}.name`}
               name={`groupRules.${i}.name`}
-              label={shouldShowLabel(i) ? "Name" : null}
+              label={null}
               value={groupRule.name}
               error={formik.dirty && groupRule.name.length === 0}
               autoFocus={i === newestRule - 1}
               required
-              placeholder='Group Name'
+              placeholder="Group Name"
               onChange={formik.handleChange}
             />
             <TextField
               fullWidth
               key={`groupRules.${i}.pattern`}
               name={`groupRules.${i}.pattern`}
-              label={shouldShowLabel(i) ? 'URL Pattern (space separated for multiple)' : null}
+              label={
+                shouldShowLabel(i)
+                  ? 'URL Pattern (space separated for multiple)'
+                  : null
+              }
               value={groupRule.pattern}
               required
               multiline
@@ -576,21 +707,47 @@ const RuleForm = (props) => {
               )}
             >
               {Object.entries(COLORS).map(([colorKey, colorVal]) => (
-                <MenuItem value={colorKey}><ColorCircle value={colorVal} /></MenuItem>
+                <MenuItem value={colorKey}>
+                  <ColorCircle value={colorVal} />
+                </MenuItem>
               ))}
             </Select>
             <PostCol>
-              <ArrowUpwardIcon className={`icon ${!allowUp(i) ? 'disabled' : ''}`} onClick={() => allowUp(i) && updateRuleOrder(i, -1)} />
-              <ArrowDownwardIcon className={`icon ${!allowDown(i) ? 'disabled' : ''}`} onClick={() => allowDown(i) && updateRuleOrder(i, 1)} />
-              <DeleteIcon className='icon icon--delete' onClick={() => removeRule(i)} />
+              <ArrowUpwardIcon
+                className={`icon ${!allowUp(i) ? 'disabled' : ''}`}
+                onClick={() => allowUp(i) && updateRuleOrder(i, -1)}
+              />
+              <ArrowDownwardIcon
+                className={`icon ${!allowDown(i) ? 'disabled' : ''}`}
+                onClick={() => allowDown(i) && updateRuleOrder(i, 1)}
+              />
+              <DeleteIcon
+                className="icon icon--delete"
+                onClick={() => removeRule(i)}
+              />
             </PostCol>
           </Row>
         ))}
 
-        <Row className={`bottom-row ${showBottomRow ? 'bottom-row--show' : ''}`} style={{ flex: 10, marginBottom: '1rem', marginTop: '1rem' }} alignItems='flex-end' justifyContent='space-between' alwaysShow>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+        <Row
+          className={`bottom-row ${showBottomRow ? 'bottom-row--show' : ''}`}
+          style={{ flex: 10, marginBottom: '1rem', marginTop: '1rem' }}
+          alignItems="flex-end"
+          justifyContent="space-between"
+          alwaysShow
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+            }}
+          >
             <Tooltip title="Hotkey: Alt+Shift+C">
-              <Button onClick={() => handleCollapse(!isCollapsed)} style={{ marginLeft: '1rem', minWidth: '8rem' }}>
+              <Button
+                onClick={() => handleCollapse(!isCollapsed)}
+                style={{ marginLeft: '1rem', minWidth: '8rem' }}
+              >
                 {isCollapsed ? (
                   <>
                     <ClearAllIcon style={{ paddingRight: '1.25rem' }} />
@@ -604,12 +761,20 @@ const RuleForm = (props) => {
                 )}
               </Button>
             </Tooltip>
-            <Button onClick={() => setIsBulkMode(true)} style={{ marginLeft: '0.5rem' }}>
+            <Button
+              onClick={() => setIsBulkMode(true)}
+              style={{ marginLeft: '0.5rem' }}
+            >
               <EditIcon style={{ paddingRight: '0.75rem' }} />
               <div>Bulk Edit</div>
             </Button>
           </div>
-          <Fab color="primary" aria-label="add" style={{ marginRight: '7rem' }} onClick={addNewRule}>
+          <Fab
+            color="primary"
+            aria-label="add"
+            style={{ marginRight: '7rem' }}
+            onClick={addNewRule}
+          >
             <AddIcon />
           </Fab>
         </Row>
