@@ -3,13 +3,22 @@
   "name": "TabSense",
   "description": "Auto-Grouping Magic for your Tabs",
   "options_page": "options.html",
-  "background": { "service_worker": "background.bundle.js" },
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "tabsense-icon.svg"
+    "default_icon": {
+      "16": "tabsense-icon16.png",
+      "32": "tabsense-icon32.png",
+      "48": "tabsense-icon48.png"
+    }
   },
   "icons": {
-    "128": "tabsense-icon.svg"
+    "16": "tabsense-icon16.png",
+    "32": "tabsense-icon32.png",
+    "48": "tabsense-icon48.png",
+    "128": "tabsense-icon128.png"
   },
   "permissions": [
     "storage",
@@ -19,7 +28,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["content.styles.css", "tabsense-icon.svg", "tabsense-logo.png"],
+      "resources": [
+        "content.styles.css",
+        "tabsense-icon.svg",
+        "tabsense-logo.png"
+      ],
       "matches": []
     }
   ],
