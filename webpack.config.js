@@ -141,7 +141,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'src/assets/img/icon-128.png',
+          from: 'src/assets/img/tabsense-icon.svg',
           to: path.join(__dirname, 'build'),
           force: true,
         },
@@ -150,7 +150,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'src/assets/img/icon-34.png',
+          from: 'src/assets/img/tabsense-logo.png',
           to: path.join(__dirname, 'build'),
           force: true,
         },
