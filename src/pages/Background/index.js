@@ -1,4 +1,6 @@
 import { checkForRuleMatch } from './matchEngine';
+import debounce from 'lodash.debounce';
+import { localStorage, syncStorage } from './storageManager';
 
 const tabOverrides = new Set();
 const systemMoves = new Set();
@@ -7,9 +9,6 @@ const markSystemMove = (tabId) => {
   systemMoves.add(tabId);
   setTimeout(() => systemMoves.delete(tabId), 1000);
 };
-
-import debounce from 'lodash.debounce';
-import { localStorage, syncStorage } from './storageManager';
 
 const tabColors = [
   'grey',
