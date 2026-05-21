@@ -546,7 +546,7 @@ const RuleForm = (props) => {
         }}
       >
         <img
-          src="../../assets/img/tabsense-logo.png"
+          src="tabsense-logo.png"
           alt="TabSense Logo"
           style={{ height: '34px' }}
         />
