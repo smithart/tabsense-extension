@@ -1,5 +1,3 @@
 # TabSense
 
-Based on https://chrome.google.com/webstore/detail/tabsense/hgceopemmcmigbmhphbcgkeffommpjfc
-
-
+Based on <https://chrome.google.com/webstore/detail/tabsense/hgceopemmcmigbmhphbcgkeffommpjfc>
