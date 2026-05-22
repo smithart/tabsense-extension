@@ -4,7 +4,7 @@ import formik, { Formik, Field, Form, useFormik, FieldArray } from 'formik';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DoneIcon from '@material-ui/icons/Check';
-import AddIcon from '@material-ui/icons/Add';
+import AddCircleIcon from '@material-ui/icons/AddCircle'; // Using reversed circle icon
 import SettingsIcon from '@material-ui/icons/Settings';
 import PublishIcon from '@material-ui/icons/Publish'; // Import
 import GetAppIcon from '@material-ui/icons/GetApp'; // Export
@@ -41,14 +41,17 @@ const DARK_BLUE = '#282C34';
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
+  height: 100vh; /* Use full viewport height */
+  overflow: hidden; /* Prevent body scroll, handle scroll internally */
 
   form {
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
-    height: 100% !important;
+    justify-content: flex-start !important; /* Stack items at the top */
+    flex: 1; /* Take up remaining space */
+    overflow-y: auto; /* Allow form to scroll independently */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 
   .reaction {
@@ -137,6 +140,26 @@ const Wrapper = styled.div`
       display: none;
     }
   }
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  background-color: ${DARK_BLUE};
+`;
+
+const Footer = styled.div`
+  text-align: center;
+  padding: 0.6rem;
+  font-size: 0.85rem;
+  color: #a0aabf;
+  background-color: ${DARK_BLUE};
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 10;
 `;
 
 const PreCol = styled.div`
@@ -529,7 +552,7 @@ const RuleForm = (props) => {
   const shouldShowLabel = (i) => i === 0;
 
   return (
-    <Wrapper style={{}}>
+    <Wrapper>
       <EmojiModal
         open={showEmojiRow != null}
         handleClose={() => setShowEmojiRow(null)}
@@ -537,14 +560,7 @@ const RuleForm = (props) => {
           handleEmojiSelection(showEmojiRow, emoji)
         }
       />
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0.5rem 1rem 0',
-        }}
-      >
+      <Header>
         {/* Left Side: Logo and Actions */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img
@@ -554,9 +570,9 @@ const RuleForm = (props) => {
           />
 
           <Tooltip title="Add Rule">
-            <AddIcon
+            <AddCircleIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: '#2196f3', fontSize: '1.4rem' }}
+              style={{ marginLeft: '0.5rem', color: '#2196f3', fontSize: '1.8rem' }}
               onClick={addNewRule}
             />
           </Tooltip>
@@ -565,13 +581,13 @@ const RuleForm = (props) => {
             {isCollapsed ? (
               <ClearAllIcon
                 className="icon"
-                style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+                style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
                 onClick={() => handleCollapse(!isCollapsed)}
               />
             ) : (
               <SortIcon
                 className="icon"
-                style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+                style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
                 onClick={() => handleCollapse(!isCollapsed)}
               />
             )}
@@ -580,11 +596,10 @@ const RuleForm = (props) => {
           <Tooltip title="Bulk Edit">
             <EditIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
               onClick={() => setIsBulkMode(true)}
             />
           </Tooltip>
-
         </div>
 
         {/* Right Side: Utility Icons */}
@@ -592,20 +607,20 @@ const RuleForm = (props) => {
           <Tooltip title="Settings">
             <SettingsIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
             />
           </Tooltip>
           <Tooltip title="Export Rules">
             <GetAppIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
               onClick={handleExport}
             />
           </Tooltip>
           <Tooltip title="Import Rules">
             <PublishIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
               onClick={() => fileInputRef.current.click()}
             />
           </Tooltip>
@@ -617,10 +632,9 @@ const RuleForm = (props) => {
             onChange={handleImport}
           />
         </div>
-      </div>
-      <br />
+      </Header>
+
       <form onSubmit={formik.handleSubmit}>
-        {/* <Icon style={{ position: 'absolute' }}><ArrowBackIcon /></Icon> */}
         {formik.values.groupRules.length === 0 && (
           <FillColumn style={{ justifyContent: 'center', fontSize: '1.1rem' }}>
             <FilterListIcon style={{ fontSize: '2.5rem' }} />
@@ -637,7 +651,7 @@ const RuleForm = (props) => {
             }
             key={groupRule.key || '0'}
             alignItems="flex-end"
-            style={{ paddingLeft: '1rem', boxSizing: 'border-box' }}
+            style={{ paddingLeft: '1rem', paddingBottom: '1rem', boxSizing: 'border-box' }}
           >
             <svg
               className="reaction"
@@ -714,6 +728,11 @@ const RuleForm = (props) => {
           </Row>
         ))}
       </form>
+
+      <Footer>
+        <DoneIcon style={{ fontSize: '1rem', verticalAlign: 'text-bottom', marginRight: '0.25rem' }} />
+        Rules saved locally
+      </Footer>
     </Wrapper>
   );
 };
