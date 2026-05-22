@@ -4,10 +4,10 @@ import formik, { Formik, Field, Form, useFormik, FieldArray } from 'formik';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DoneIcon from '@material-ui/icons/Check';
-import AddCircleIcon from '@material-ui/icons/AddCircle'; // Using reversed circle icon
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
-import PublishIcon from '@material-ui/icons/Publish'; // Import
-import GetAppIcon from '@material-ui/icons/GetApp'; // Export
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import EditIcon from '@material-ui/icons/Edit';
@@ -21,7 +21,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Fab from '@material-ui/core/Fab';
 import Tooltip from '@material-ui/core/Tooltip';
-import Draggable, { DraggableCore } from 'react-draggable'; // Both at the same time
+import Draggable, { DraggableCore } from 'react-draggable';
 import { COLORS } from '../Colors';
 
 import TabDemo from './TabDemo';
@@ -32,7 +32,7 @@ import TextField from '@material-ui/core/TextField';
 import './Popup.css';
 import EmojiModal from './EmojiModal';
 
-const TABSENSE_GREEN = '#12FA73';
+const TABSENSE_BLUE = '#2196f3';
 const TABSENSE_ORANGE = '#fa7312';
 const TABSENSE_RED = '#fb4453';
 const TABSENSE_PURPLE = '#7312fa';
@@ -41,17 +41,41 @@ const DARK_BLUE = '#282C34';
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Use full viewport height */
-  overflow: hidden; /* Prevent body scroll, handle scroll internally */
+  /* Pins the wrapper to the absolute edges of the window, overriding parent flex containers */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  background-color: ${DARK_BLUE};
 
   form {
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important; /* Stack items at the top */
-    flex: 1; /* Take up remaining space */
-    overflow-y: auto; /* Allow form to scroll independently */
+    justify-content: flex-start !important;
+    flex: 1 1 auto;
+    min-height: 0; 
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-top: 1rem;
     padding-bottom: 1rem;
+
+    /* Sleek Custom Scrollbars */
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #4a5160;
+      border-radius: 4px;
+      border: 2px solid ${DARK_BLUE};
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #626c7f;
+    }
   }
 
   .reaction {
@@ -73,20 +97,24 @@ const Wrapper = styled.div`
   }
 
   .icon {
+    color: #a0aabf; 
+    transition: color 150ms;
+    
     &:hover {
       cursor: pointer;
-      color: ${TABSENSE_GREEN};
+      color: ${TABSENSE_BLUE};
     }
 
     &--delete:hover {
       color: ${TABSENSE_RED};
     }
-  }
 
-  .icon.disabled {
-    &:hover {
+    &.disabled {
+      opacity: 0.3;
       cursor: initial;
-      color: inherit;
+      &:hover {
+        color: #a0aabf;
+      }
     }
   }
 
@@ -118,7 +146,6 @@ const Wrapper = styled.div`
   }
 
   .moving {
-    // background: red !important;
     transition: transform 75ms ease-in-out;
     transform: translate(0, 5px);
   }
@@ -150,30 +177,46 @@ const Header = styled.div`
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   z-index: 10;
   background-color: ${DARK_BLUE};
+  flex-shrink: 0;
 `;
 
 const Footer = styled.div`
-  text-align: center;
-  padding: 0.6rem;
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.8rem; 
+  flex-shrink: 0;
+  font-size: 0.75rem;
   color: #a0aabf;
   background-color: ${DARK_BLUE};
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
   z-index: 10;
+`;
+
+const Separator = styled.div`
+  width: 1px;
+  height: 1.5rem;
+  background-color: #4a5160;
+  margin: 0 0.25rem;
 `;
 
 const PreCol = styled.div`
   width: 6rem;
 `;
+
 const PostCol = styled.div`
-  width: 12rem;
+  width: 7rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
 `;
 
 const Icon = styled.div`
   cursor: pointer;
   color: #f1f1f1;
   &:hover {
-    color: ${TABSENSE_GREEN};
+    color: ${TABSENSE_BLUE};
   }
 
   ${(props) =>
@@ -199,18 +242,14 @@ const Row = styled.div`
   ${(props) =>
     !props.alwaysShow &&
     css`
-      svg {
+      .reaction {
         opacity: 0;
         transition: opacity 100ms;
       }
 
       &:hover {
-        svg {
+        .reaction {
           opacity: 1;
-        }
-
-        .icon.disabled {
-          opacity: 0.2;
         }
       }
     `}
@@ -561,18 +600,20 @@ const RuleForm = (props) => {
         }
       />
       <Header>
-        {/* Left Side: Logo and Actions */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img
-            src="tabsense-logo.png"
-            alt="TabSense Logo"
-            style={{ height: '34px', marginRight: '1rem' }}
-          />
+        {/* Left Side: Logo */}
+        <img
+          src="tabsense-logo.png"
+          alt="TabSense Logo"
+          style={{ height: '34px' }}
+        />
+
+        {/* Right Side: Consolidated Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
 
           <Tooltip title="Add Rule">
             <AddCircleIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: '#2196f3', fontSize: '1.8rem' }}
+              style={{ color: TABSENSE_BLUE, fontSize: '1.8rem' }}
               onClick={addNewRule}
             />
           </Tooltip>
@@ -581,13 +622,13 @@ const RuleForm = (props) => {
             {isCollapsed ? (
               <ClearAllIcon
                 className="icon"
-                style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
+                style={{ fontSize: '1.8rem' }}
                 onClick={() => handleCollapse(!isCollapsed)}
               />
             ) : (
               <SortIcon
                 className="icon"
-                style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
+                style={{ fontSize: '1.8rem' }}
                 onClick={() => handleCollapse(!isCollapsed)}
               />
             )}
@@ -596,34 +637,27 @@ const RuleForm = (props) => {
           <Tooltip title="Bulk Edit">
             <EditIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
+              style={{ fontSize: '1.8rem' }}
               onClick={() => setIsBulkMode(true)}
             />
           </Tooltip>
-        </div>
 
-        {/* Right Side: Utility Icons */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title="Settings">
-            <SettingsIcon
-              className="icon"
-              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
-            />
-          </Tooltip>
           <Tooltip title="Export Rules">
             <GetAppIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
+              style={{ fontSize: '1.8rem' }}
               onClick={handleExport}
             />
           </Tooltip>
+
           <Tooltip title="Import Rules">
             <PublishIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: '#a0aabf', fontSize: '1.8rem' }}
+              style={{ fontSize: '1.8rem' }}
               onClick={() => fileInputRef.current.click()}
             />
           </Tooltip>
+
           <input
             type="file"
             ref={fileInputRef}
@@ -631,6 +665,16 @@ const RuleForm = (props) => {
             accept=".json"
             onChange={handleImport}
           />
+
+          <Separator />
+
+          <Tooltip title="Settings">
+            <SettingsIcon
+              className="icon"
+              style={{ fontSize: '1.8rem' }}
+            />
+          </Tooltip>
+
         </div>
       </Header>
 
@@ -651,7 +695,7 @@ const RuleForm = (props) => {
             }
             key={groupRule.key || '0'}
             alignItems="flex-end"
-            style={{ paddingLeft: '1rem', paddingBottom: '1rem', boxSizing: 'border-box' }}
+            style={{ paddingLeft: '1rem', paddingBottom: '1rem', paddingRight: '0.5rem', boxSizing: 'border-box' }}
           >
             <svg
               className="reaction"
@@ -712,6 +756,19 @@ const RuleForm = (props) => {
               ))}
             </Select>
             <PostCol>
+              {shouldShowLabel(i) && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-20px',
+                  left: '0',
+                  width: '100%',
+                  textAlign: 'center',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  Actions
+                </div>
+              )}
               <ArrowUpwardIcon
                 className={`icon ${!allowUp(i) ? 'disabled' : ''}`}
                 onClick={() => allowUp(i) && updateRuleOrder(i, -1)}
@@ -730,7 +787,7 @@ const RuleForm = (props) => {
       </form>
 
       <Footer>
-        <DoneIcon style={{ fontSize: '1rem', verticalAlign: 'text-bottom', marginRight: '0.25rem' }} />
+        <DoneIcon style={{ fontSize: '1rem', marginRight: '0.35rem' }} />
         Rules saved locally
       </Footer>
     </Wrapper>
