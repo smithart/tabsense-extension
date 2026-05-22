@@ -225,21 +225,6 @@ const FillColumn = styled.div`
   height: 100%;
 `;
 
-const HeaderActionBtn = styled(Button)`
-  && {
-    text-transform: none;
-    color: #cfcfcf;
-    font-size: 0.9rem;
-    padding: 4px 8px;
-    min-width: auto;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: ${TABSENSE_GREEN};
-    }
-  }
-`;
-
 const getAll = (ptrn) => {
   return new Promise((resolve) => {
     chrome.storage.sync.get(null, (data) => {
@@ -568,6 +553,14 @@ const RuleForm = (props) => {
             style={{ height: '34px', marginRight: '1rem' }}
           />
 
+          <Tooltip title="Add Rule">
+            <AddIcon
+              className="icon"
+              style={{ marginLeft: '0.5rem', color: '#2196f3', fontSize: '1.4rem' }}
+              onClick={addNewRule}
+            />
+          </Tooltip>
+
           <Tooltip title={isCollapsed ? "Expand Groups" : "Collapse Groups"}>
             {isCollapsed ? (
               <ClearAllIcon
@@ -592,10 +585,6 @@ const RuleForm = (props) => {
             />
           </Tooltip>
 
-          <HeaderActionBtn onClick={addNewRule} style={{ marginLeft: '1rem', color: '#12FA73' }}>
-            <AddIcon style={{ marginRight: '0.25rem', fontSize: '1.2rem' }} />
-            Add Rule
-          </HeaderActionBtn>
         </div>
 
         {/* Right Side: Utility Icons */}
