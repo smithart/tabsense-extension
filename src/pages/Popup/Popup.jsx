@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import './Fix';
@@ -28,6 +29,7 @@ const GlobalStyle = createGlobalStyle`
     width: 40rem;
     min-height: 20rem;
     height: 30rem;
+    height: ${(props) => (props.$height ? `${props.$height}px` : '30rem')};
     color: white;
   }
 `;
@@ -108,19 +110,20 @@ const Popup = () => {
   const [formKey, setFormKey] = useState('initial');
   const [value, setValue] = useState(0);
   const [hasConfirmed, setHasConfirmed] = useState(false);
+  const [bodyHeight, setBodyHeight] = useState(null);
 
-  useEffect(async () => {
-    let groupRules = await syncStorage.get('groupRules');
-    if (groupRules) {
-      groupRules = groupRules.map((r) => ({
-        ...r,
-        pattern: (r.patterns || [r.pattern || '']).join(' '),
-      }));
-    }
-    const hasConfirmed = await syncStorage.get('hasConfirmed');
-    setHasConfirmed(hasConfirmed);
-    setGroupRules(groupRules || []);
-    setIsLoading(false);
+  // Dynamic height detection (minus 20px)
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (window.innerHeight) {
+        setBodyHeight(window.innerHeight - 20);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
   }, []);
 
   const rerenderForm = () => {
@@ -169,13 +172,15 @@ const Popup = () => {
             />
           </>
         );
+      default:
+        return null;
     }
   };
   // return null;
+
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        <GlobalStyle />
         <Wrapper>
           <ContentWrapper>{renderMain()}</ContentWrapper>
         </Wrapper>
