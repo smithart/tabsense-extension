@@ -27,7 +27,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     width: 40rem;
     min-height: 20rem;
-    height: 100vh;
+    height: 30rem;
     color: white;
   }
 `;
