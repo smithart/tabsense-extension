@@ -216,12 +216,28 @@ const ColorCircle = styled.div`
         `}
     `}
 `;
+
 const FillColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   height: 100%;
+`;
+
+const HeaderActionBtn = styled(Button)`
+  && {
+    text-transform: none;
+    color: #cfcfcf;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    min-width: auto;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: ${TABSENSE_GREEN};
+    }
+  }
 `;
 
 const getAll = (ptrn) => {
@@ -544,68 +560,63 @@ const RuleForm = (props) => {
           padding: '0.5rem 1rem 0',
         }}
       >
-        <img
-          src="tabsense-logo.png"
-          alt="TabSense Logo"
-          style={{ height: '34px' }}
-        />
-
-        {/* Container for all top bar actions */}
+        {/* Left Side: Logo and Actions */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="tabsense-logo.png"
+            alt="TabSense Logo"
+            style={{ height: '34px', marginRight: '1rem' }}
+          />
 
-          {/* --- MOVED BUTTONS --- */}
-          <Button
-            onClick={() => handleCollapse(!isCollapsed)}
-            style={{ marginRight: '0.5rem' }}
-            size="small"
-          >
+          <Tooltip title={isCollapsed ? "Expand Groups" : "Collapse Groups"}>
             {isCollapsed ? (
-              <>
-                <ClearAllIcon style={{ paddingRight: '0.25rem' }} />
-              </>
+              <ClearAllIcon
+                className="icon"
+                style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+                onClick={() => handleCollapse(!isCollapsed)}
+              />
             ) : (
-              <>
-                <SortIcon style={{ paddingRight: '0.25rem' }} />
-              </>
+              <SortIcon
+                className="icon"
+                style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+                onClick={() => handleCollapse(!isCollapsed)}
+              />
             )}
-          </Button>
+          </Tooltip>
 
-          <Button
-            onClick={() => setIsBulkMode(true)}
-            style={{ marginRight: '1rem' }}
-            size="small"
-          >
-            <EditIcon style={{ paddingRight: '0.25rem' }} />
-          </Button>
-
-          {/* Transformed FAB into a top-bar Icon */}
-          <Tooltip title="Add New Rule">
-            <AddIcon
+          <Tooltip title="Bulk Edit">
+            <EditIcon
               className="icon"
-              style={{ color: '#12FA73', marginRight: '0.5rem' }}
-              onClick={addNewRule}
+              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
+              onClick={() => setIsBulkMode(true)}
             />
           </Tooltip>
-          {/* --- END MOVED BUTTONS --- */}
 
-          {/* Original Top Bar Icons */}
+          <HeaderActionBtn onClick={addNewRule} style={{ marginLeft: '1rem', color: '#12FA73' }}>
+            <AddIcon style={{ marginRight: '0.25rem', fontSize: '1.2rem' }} />
+            Add Rule
+          </HeaderActionBtn>
+        </div>
+
+        {/* Right Side: Utility Icons */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title="Settings">
             <SettingsIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey' }}
+              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
             />
           </Tooltip>
           <Tooltip title="Export Rules">
             <GetAppIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey' }}
+              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
               onClick={handleExport}
             />
           </Tooltip>
           <Tooltip title="Import Rules">
             <PublishIcon
               className="icon"
-              style={{ marginLeft: '0.5rem', color: 'grey' }}
+              style={{ marginLeft: '0.5rem', color: 'grey', fontSize: '1.4rem' }}
               onClick={() => fileInputRef.current.click()}
             />
           </Tooltip>
