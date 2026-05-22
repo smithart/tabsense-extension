@@ -264,8 +264,7 @@ const isAnyTabSenseGroupCollapsed = async () => {
 const TAB_BORDER_COLOR = '#9a9a9a';
 
 const ruleToText = (rule) =>
-  `${rule.name}, ${rule.pattern.replace('\n', '   ')}${
-    rule.color ? ', ' + rule.color : ''
+  `${rule.name}, ${rule.pattern.replace('\n', '   ')}${rule.color ? ', ' + rule.color : ''
   }`;
 
 const RuleForm = (props) => {
@@ -550,7 +549,46 @@ const RuleForm = (props) => {
           alt="TabSense Logo"
           style={{ height: '34px' }}
         />
-        <div style={{ display: 'flex' }}>
+
+        {/* Container for all top bar actions */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+
+          {/* --- MOVED BUTTONS --- */}
+          <Button
+            onClick={() => handleCollapse(!isCollapsed)}
+            style={{ marginRight: '0.5rem' }}
+            size="small"
+          >
+            {isCollapsed ? (
+              <>
+                <ClearAllIcon style={{ paddingRight: '0.25rem' }} />
+              </>
+            ) : (
+              <>
+                <SortIcon style={{ paddingRight: '0.25rem' }} />
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={() => setIsBulkMode(true)}
+            style={{ marginRight: '1rem' }}
+            size="small"
+          >
+            <EditIcon style={{ paddingRight: '0.25rem' }} />
+          </Button>
+
+          {/* Transformed FAB into a top-bar Icon */}
+          <Tooltip title="Add New Rule">
+            <AddIcon
+              className="icon"
+              style={{ color: '#12FA73', marginRight: '0.5rem' }}
+              onClick={addNewRule}
+            />
+          </Tooltip>
+          {/* --- END MOVED BUTTONS --- */}
+
+          {/* Original Top Bar Icons */}
           <Tooltip title="Settings">
             <SettingsIcon
               className="icon"
@@ -593,9 +631,8 @@ const RuleForm = (props) => {
           <Row
             className={
               getMove(i)
-                ? `moving moving--${getMove(i)} ${
-                    indirectlyMoved(i) ? 'moving--indirect' : ''
-                  }`
+                ? `moving moving--${getMove(i)} ${indirectlyMoved(i) ? 'moving--indirect' : ''
+                }`
                 : ''
             }
             key={groupRule.key || '0'}
@@ -676,56 +713,6 @@ const RuleForm = (props) => {
             </PostCol>
           </Row>
         ))}
-
-        <Row
-          className={`bottom-row ${showBottomRow ? 'bottom-row--show' : ''}`}
-          style={{ flex: 10, marginBottom: '1rem', marginTop: '1rem' }}
-          alignItems="flex-end"
-          justifyContent="space-between"
-          alwaysShow
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'flex-start',
-            }}
-          >
-            <Tooltip title="Hotkey: Alt+Shift+C">
-              <Button
-                onClick={() => handleCollapse(!isCollapsed)}
-                style={{ marginLeft: '1rem', minWidth: '8rem' }}
-              >
-                {isCollapsed ? (
-                  <>
-                    <ClearAllIcon style={{ paddingRight: '1.25rem' }} />
-                    <div>Expand</div>
-                  </>
-                ) : (
-                  <>
-                    <SortIcon style={{ paddingRight: '0.5rem' }} />
-                    <div>Collapse</div>
-                  </>
-                )}
-              </Button>
-            </Tooltip>
-            <Button
-              onClick={() => setIsBulkMode(true)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <EditIcon style={{ paddingRight: '0.75rem' }} />
-              <div>Bulk Edit</div>
-            </Button>
-          </div>
-          <Fab
-            color="primary"
-            aria-label="add"
-            style={{ marginRight: '7rem' }}
-            onClick={addNewRule}
-          >
-            <AddIcon />
-          </Fab>
-        </Row>
       </form>
     </Wrapper>
   );
