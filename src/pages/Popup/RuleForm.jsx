@@ -589,58 +589,6 @@ const RuleForm = (props) => {
             No rules yet, add one to start!
           </FillColumn>
         )}
-        {formik.values.groupRules.length > 0 && (
-          <Row
-            className={'special-hide'}
-            key={'null'}
-            alignItems="flex-end"
-            style={{
-              paddingLeft: '1rem',
-              boxSizing: 'border-box',
-              opacity: 0.8,
-              pointerEvents: 'none',
-              marginBottom: '-1rem',
-            }}
-          >
-            <svg
-              className="reaction"
-              style={{ opacity: 0 }}
-              transform="scale(1.25, 1.25)"
-              viewBox="0 0 16 16"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M12 1h-1v3H8v1h3v3h1V5h3V4h-3V1z"
-              />
-            </svg>
-            <TextField
-              style={{ minWidth: '8rem' }}
-              key={`groupRules.${0}.name`}
-              name={`groupRules.${0}.name`}
-              label="Name"
-              value=""
-              placeholder=""
-            />
-            <TextField
-              fullWidth
-              key={`groupRules.${0}.pattern`}
-              name={`groupRules.${0}.pattern`}
-              label="URL Pattern (space separated for multiple)"
-              value=""
-              placeholder=""
-            />
-            <Select
-              style={{ opacity: 0 }}
-              key={`groupRules.${0}.color`}
-              name={`groupRules.${0}.color`}
-              displayEmpty
-            ></Select>
-            <PostCol style={{ opacity: 0 }}></PostCol>
-          </Row>
-        )}
         {formik.values.groupRules.map((groupRule, i) => (
           <Row
             className={
@@ -672,7 +620,7 @@ const RuleForm = (props) => {
               style={{ minWidth: '8rem' }}
               key={`groupRules.${i}.name`}
               name={`groupRules.${i}.name`}
-              label={null}
+              label={shouldShowLabel(i) ? 'Name' : null}
               value={groupRule.name}
               error={formik.dirty && groupRule.name.length === 0}
               autoFocus={i === newestRule - 1}
