@@ -41,12 +41,9 @@ const DARK_BLUE = '#282C34';
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  /* Pins the wrapper to the absolute edges of the window, overriding parent flex containers */
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  height: 600px; /* Forces the Chrome popup to open at its maximum allowed height */
+  max-height: 100vh;
+  width: 100%;
   overflow: hidden;
   background-color: ${DARK_BLUE};
 
@@ -759,11 +756,12 @@ const RuleForm = (props) => {
               {shouldShowLabel(i) && (
                 <div style={{
                   position: 'absolute',
-                  top: '-20px',
+                  top: '-26px',
                   left: '0',
                   width: '100%',
                   textAlign: 'center',
-                  fontSize: '0.75rem',
+                  fontSize: '12px',
+                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
                   color: 'rgba(255, 255, 255, 0.7)'
                 }}>
                   Actions

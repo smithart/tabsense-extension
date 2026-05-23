@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import React, { useEffect, useState, useLayoutEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import './Fix';
@@ -21,15 +20,13 @@ const DARK_BLUE = '#282C34';
 const TABSENSE_GREEN = '#12FA73';
 
 const GlobalStyle = createGlobalStyle`
-  html {
-    background-color: #282C34;
-  }
-
-  body {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: ${DARK_BLUE};
     width: 40rem;
-    min-height: 20rem;
-    height: 30rem;
-    height: ${(props) => (props.$height ? `${props.$height}px` : '30rem')};
+    height: 500px; /* Forces Chrome to open the popup at exactly this height */
+    overflow: hidden; /* Prevents the outer window scrollbar */
     color: white;
   }
 `;
@@ -61,6 +58,7 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+  height: 100%;
   justify-content: space-between;
 `;
 
@@ -110,20 +108,22 @@ const Popup = () => {
   const [formKey, setFormKey] = useState('initial');
   const [value, setValue] = useState(0);
   const [hasConfirmed, setHasConfirmed] = useState(false);
-  const [bodyHeight, setBodyHeight] = useState(null);
 
-  // Dynamic height detection (minus 20px)
-  useLayoutEffect(() => {
-    const updateHeight = () => {
-      if (window.innerHeight) {
-        setBodyHeight(window.innerHeight - 20);
+  useEffect(() => {
+    const loadData = async () => {
+      let groupRules = await syncStorage.get('groupRules');
+      if (groupRules) {
+        groupRules = groupRules.map((r) => ({
+          ...r,
+          pattern: (r.patterns || [r.pattern || '']).join(' '),
+        }));
       }
+      const hasConfirmed = await syncStorage.get('hasConfirmed');
+      setHasConfirmed(hasConfirmed);
+      setGroupRules(groupRules || []);
+      setIsLoading(false);
     };
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
-  }, []);
-
+    loadData();
   }, []);
 
   const rerenderForm = () => {
@@ -160,27 +160,25 @@ const Popup = () => {
     switch (value) {
       case 0:
         return (
-          <>
-            <RuleForm
-              key={formKey}
-              groupRules={groupRules}
-              saveGroupRules={saveGroupRules}
-              handleCollapseGroups={collapseBackground}
-              handleReload={updateBackground}
-              showConfirm={!hasConfirmed}
-              handleConfirm={confirmInitial}
-            />
-          </>
+          <RuleForm
+            key={formKey}
+            groupRules={groupRules}
+            saveGroupRules={saveGroupRules}
+            handleCollapseGroups={collapseBackground}
+            handleReload={updateBackground}
+            showConfirm={!hasConfirmed}
+            handleConfirm={confirmInitial}
+          />
         );
       default:
         return null;
     }
   };
-  // return null;
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="App">
+      <div className="App" style={{ height: '100%' }}>
+        <GlobalStyle />
         <Wrapper>
           <ContentWrapper>{renderMain()}</ContentWrapper>
         </Wrapper>
