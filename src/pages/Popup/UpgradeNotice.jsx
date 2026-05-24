@@ -9,31 +9,31 @@ import TwitterIconUrl from '../../assets/img/twitter-logo.png';
 import GoogleIconUrl from '../../assets/img/google-icon.png';
 import WarningIcon from '@material-ui/icons/Warning';
 
-
-
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import './Popup.css';
 
-const ACID_GREEN = '#12FA73';
+const TABSENSE_GREEN = '#12FA73';
 const DARK_BLUE = '#282C34';
 
 const Icon = styled.div`
   cursor: pointer;
   &:hover {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
-  ${props => props.disabled && css`
-    opacity: 0.25;
-    cursor: initial;
+  ${(props) =>
+    props.disabled &&
+    css`
+      opacity: 0.25;
+      cursor: initial;
 
-    &:hover{
-      color: inherit;
-    }
-  `}
-`
+      &:hover {
+        color: inherit;
+      }
+    `}
+`;
 
 const ExampleWrapper = styled.div`
   padding: 2rem 1rem;
@@ -47,7 +47,7 @@ const ExampleWrapper = styled.div`
   svg {
     font-size: 2.5rem;
   }
-`
+`;
 
 const FillColumn = styled.div`
   display: flex;
@@ -55,7 +55,7 @@ const FillColumn = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 100%;
-`
+`;
 
 const TAB_BORDER_COLOR = '#9a9a9a';
 
@@ -69,39 +69,45 @@ const Prompt = styled.div`
   span {
     font-weight: bold;
   }
-`
+`;
 
 const EverBlue = styled.a`
   font-size: 1.5rem;
-  color: #89B4F8 !important;
+  color: #89b4f8 !important;
 `;
 
 const UpgradeNotice = (props) => {
-  const match = navigator.userAgent.match('Chrome\/([0-9.]+)');
+  const match = navigator.userAgent.match('Chrome/([0-9.]+)');
   const currentVersion = match && match.length > 1 && match[1];
-  
+
   return (
-      <FillColumn>
+    <FillColumn>
       <ExampleWrapper>
-          <WarningIcon />
-          <Prompt>
-            <br />
-            Hey! It looks like your Chrome version may be a bit too old to use StickyTabs.
-            <br />
-            <br />
-            Please update to <span>version 89 (or greater)</span> to use this extension.
-            <br />
-            <br />
-            {currentVersion ? `[Currently ${currentVersion}]` : ''}
-            <br />
-            <br />
-            <br />
-            <EverBlue target='_blank' href='https://www.google.com/chrome/update/'>Update Chrome</EverBlue>
-          </Prompt>
+        <WarningIcon />
+        <Prompt>
+          <br />
+          Hey! It looks like your Chrome version may be a bit too old to use
+          StickyTabs.
+          <br />
+          <br />
+          Please update to <span>version 89 (or greater)</span> to use this
+          extension.
+          <br />
+          <br />
+          {currentVersion ? `[Currently ${currentVersion}]` : ''}
+          <br />
+          <br />
+          <br />
+          <EverBlue
+            target="_blank"
+            href="https://www.google.com/chrome/update/"
+          >
+            Update Chrome
+          </EverBlue>
+        </Prompt>
       </ExampleWrapper>
-      </FillColumn>
+    </FillColumn>
   );
 };
 
 export default UpgradeNotice;
-  

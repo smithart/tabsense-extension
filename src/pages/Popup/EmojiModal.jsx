@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Modal from '@material-ui/core/Modal';
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import styled from 'styled-components';
 
 const PickerWrapper = styled.div`
@@ -9,7 +9,7 @@ const PickerWrapper = styled.div`
     margin-top: 5vh;
     height: 90vh;
   }
-`
+`;
 
 const modalStyle = {
   position: 'absolute',
@@ -29,27 +29,25 @@ const EmojiModal = (props) => {
   const onEmojiSelect = (emoji) => {
     handleEmojiSelection(emoji.native);
     handleClose();
-  }
+  };
 
-  return <div>
-    <Modal
-      open={open}
-      style={modalStyle}
-      onClick={() => handleClose()}
-    >
-      <PickerWrapper onClick={(e) => e.stopPropagation()}>
-        <Picker
-          className="picker"
-          autoFocus
-          data={data}
-          maxFrequentRows={3}
-          perLine={9}
-          onEmojiSelect={onEmojiSelect}
-        // onClickOutside={() => handleClose()}
-        />
-      </PickerWrapper>
-    </Modal>
-  </div>
-}
+  return (
+    <div>
+      <Modal open={open} style={modalStyle} onClick={() => handleClose()}>
+        <PickerWrapper onClick={(e) => e.stopPropagation()}>
+          <Picker
+            className="picker"
+            autoFocus
+            data={data}
+            maxFrequentRows={3}
+            perLine={9}
+            onEmojiSelect={onEmojiSelect}
+            // onClickOutside={() => handleClose()}
+          />
+        </PickerWrapper>
+      </Modal>
+    </div>
+  );
+};
 
 export default EmojiModal;
