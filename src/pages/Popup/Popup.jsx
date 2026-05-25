@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import './Fix';
@@ -12,12 +12,12 @@ import debounce from 'lodash.debounce';
 
 const theme = createMuiTheme({
   palette: {
-    type: "dark",
-  }
+    type: 'dark',
+  },
 });
 
 const DARK_BLUE = '#282C34';
-const ACID_GREEN = '#12FA73';
+const TABSENSE_GREEN = '#12FA73';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -27,10 +27,11 @@ const GlobalStyle = createGlobalStyle`
   body {
     width: 40rem;
     min-height: 20rem;
-    height: 100vh;
+    height: 30rem;
+    height: ${(props) => (props.$height ? `${props.$height}px` : '30rem')};
     color: white;
   }
-`
+`;
 
 const Wrapper = styled.div`
   width: 100%;
@@ -47,13 +48,13 @@ const Wrapper = styled.div`
   }
 
   .MuiTab-textColorPrimary.Mui-selected {
-    color: ${ACID_GREEN};
+    color: ${TABSENSE_GREEN};
   }
 
   .MuiTabs-indicator {
-    background-color: ${ACID_GREEN};
+    background-color: ${TABSENSE_GREEN};
   }
-`
+`;
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -63,70 +64,112 @@ const ContentWrapper = styled.div`
 `;
 
 const initialRules = [
-  { key: 0, name: 'mail', pattern: 'mail.google.com outlook.com https://mail.*', color: 'grey' },
+  {
+    key: 0,
+    name: 'mail',
+    pattern: 'mail.google.com outlook.com https://mail.*',
+    color: 'grey',
+  },
   { key: 1, name: 'google', pattern: 'google.com', color: 'blue' },
-  { key: 2, name: 'social', pattern: 'twitter.com instagram.com linkedin.com', color: 'yellow' },
-  { key: 3, name: 'entertainment', pattern: 'reddit.com youtube.com pinterest.com', color: 'purple' },
+  {
+    key: 2,
+    name: 'social',
+    pattern: 'twitter.com instagram.com linkedin.com',
+    color: 'yellow',
+  },
+  {
+    key: 3,
+    name: 'entertainment',
+    pattern: 'reddit.com youtube.com pinterest.com',
+    color: 'purple',
+  },
   { key: 4, name: 'news', pattern: 'news.*', color: 'green' },
-]
+];
 
-const rule = (key = 0, pattern = '', name = 'rule') => ({ key, pattern, name })
-const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
+const rule = (key = 0, pattern = '', name = 'rule') => ({ key, pattern, name });
+const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));
 
 const updateBackground = debounce(() => {
-  chrome.runtime.sendMessage({ updated: true })
-}, 250)
+  chrome.runtime.sendMessage({ updated: true });
+}, 250);
 
 const collapseBackground = debounce((state) => {
-  chrome.runtime.sendMessage({ collapse: state, expand: !state })
-}, 100)
+  chrome.runtime.sendMessage({ collapse: state, expand: !state });
+}, 100);
 
 // Async call to wayscript program to log new user event
 const logNewUserEvent = () => {
   const url = 'https://45845.wayscript.io?env=prod';
-  fetch(url)
+  fetch(url);
 };
 
 const Popup = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [groupRules, setGroupRules] = useState([])
-  const [formKey, setFormKey] = useState('initial')
+  const [isLoading, setIsLoading] = useState(true);
+  const [groupRules, setGroupRules] = useState([]);
+  const [formKey, setFormKey] = useState('initial');
   const [value, setValue] = useState(0);
   const [hasConfirmed, setHasConfirmed] = useState(false);
+  const [bodyHeight, setBodyHeight] = useState(null);
 
-  useEffect(async () => {
-    const groupRules = await syncStorage.get('groupRules');
-    const hasConfirmed = await syncStorage.get('hasConfirmed');
-    setHasConfirmed(hasConfirmed)
-    setGroupRules(groupRules || [])
-    setIsLoading(false)
-  }, [])
+  useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      let groupRules = await syncStorage.get('groupRules');
+      if (groupRules) {
+        groupRules = groupRules.map((r) => ({
+          ...r,
+          pattern: (r.patterns || [r.pattern || '']).join(' '),
+        }));
+      }
+      const hasConfirmed = await syncStorage.get('hasConfirmed');
+      if (isMounted) {
+        setHasConfirmed(hasConfirmed);
+        setGroupRules(groupRules || []);
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+    return () => { isMounted = false; };
+  }, []);
 
+  // Dynamic height detection (minus 20px)
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (window.innerHeight) {
+        setBodyHeight(window.innerHeight - 20);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   const rerenderForm = () => {
-    const rand = Math.floor(Math.random() * 1000)
-    setFormKey(`form-${rand}`)
-  }
+    const rand = Math.floor(Math.random() * 1000);
+    setFormKey(`form-${rand}`);
+  };
 
   const saveGroupRules = async (rules, shouldRefresh = false) => {
     const rulesWithIds = rules.map((r) => {
+      r.patterns = (r.pattern || '').split(/\s+/).filter((p) => p.length > 0);
+      r.enabled = r.enabled !== false;
       if (r.id) return r;
       r.id = getRandomInt(100000);
       return r;
-    })
-    await syncStorage.set('groupRules', rulesWithIds)
-    setGroupRules(rulesWithIds)
-    updateBackground()
-    if (shouldRefresh) rerenderForm()
-  }
+    });
+    await syncStorage.set('groupRules', rulesWithIds);
+    setGroupRules(rulesWithIds);
+    updateBackground();
+    if (shouldRefresh) rerenderForm();
+  };
 
   const confirmInitial = async () => {
-    syncStorage.set('hasConfirmed', true)
-    logNewUserEvent()
-    await saveGroupRules(initialRules, true)
-    setTimeout(updateBackground(), 3000)
-    setHasConfirmed(true)
-  }
+    syncStorage.set('hasConfirmed', true);
+    logNewUserEvent();
+    await saveGroupRules(initialRules, true);
+    setTimeout(updateBackground(), 3000);
+    setHasConfirmed(true);
+  };
 
   const upgradeNeeded = !chrome.tabGroups;
   const renderMain = () => {
@@ -146,18 +189,19 @@ const Popup = () => {
               handleConfirm={confirmInitial}
             />
           </>
-        )
+        );
+      default:
+        return null;
     }
-  }
+  };
   // return null;
+
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        <GlobalStyle />
+        <GlobalStyle $height={bodyHeight} />
         <Wrapper>
-          <ContentWrapper>
-            {renderMain()}
-          </ContentWrapper>
+          <ContentWrapper>{renderMain()}</ContentWrapper>
         </Wrapper>
       </div>
     </ThemeProvider>
