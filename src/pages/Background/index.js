@@ -43,7 +43,7 @@ const getRuleForTabGroup = async (tabGroupId) => {
   const windowGroupEntries = await localStorage.getAll(
     `window:.*:rule:.*:groupId`
   );
-  const match = windowGroupEntries.find(([, v]) => v === tabGroupId);
+  const match = windowGroupEntries.find(([k, v]) => v === tabGroupId);
   if (match) {
     const [k] = match;
     const ruleId = k
@@ -60,7 +60,7 @@ const getTabSenseGroups = async (windowId = null) => {
     ? `window:${windowId}:rule:.*:groupId`
     : `window:.*:rule:.*:groupId`;
   const windowGroupEntries = await localStorage.getAll(pattern);
-  return windowGroupEntries.map(([, v]) => v) || [];
+  return windowGroupEntries.map(([k, v]) => v) || [];
 };
 
 const getTabGroup = async (id) =>
@@ -137,10 +137,10 @@ const clearOldWindowEntries = async () => {
   const allWindowEntries = await localStorage.getAll('window:.*:tabGroups');
   const windows = await chrome.windows.getAll();
   const oldWindowEntries = allWindowEntries.filter(
-    ([k]) => !windows.some((w) => k.includes(`window:${w.id}:tabGroups`))
+    ([k, v]) => !windows.some((w) => k.includes(`window:${w.id}:tabGroups`))
   );
 
-  const oldKeys = oldWindowEntries.map(([k]) => k);
+  const oldKeys = oldWindowEntries.map(([k, _]) => k);
   await localStorage.remove(oldKeys);
 };
 
@@ -150,7 +150,7 @@ const clearOldEntries = async () => {
   );
   const rules = await getGroupRules();
   const oldRuleGroupEntries = allRuleGroupEntries.filter(
-    ([k]) => !rules.some((r) => k.includes(`rule:${r.id}:groupId`))
+    ([k, v]) => !rules.some((r) => k.includes(`rule:${r.id}:groupId`))
   );
 
   for (const [, groupId] of oldRuleGroupEntries) {
@@ -161,7 +161,7 @@ const clearOldEntries = async () => {
       await new Promise((resolve) => chrome.tabs.ungroup(tab.id, resolve));
     }
   }
-  const oldKeys = oldRuleGroupEntries.map(([k]) => k);
+  const oldKeys = oldRuleGroupEntries.map(([k, _]) => k);
   await localStorage.remove(oldKeys);
 };
 
