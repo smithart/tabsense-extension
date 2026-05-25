@@ -334,25 +334,26 @@ const RuleForm = (props) => {
   });
 
   const removeRule = (index) => {
-    formik.values.groupRules.splice(index, 1);
-    formik.setFieldValue('groupRules', [...formik.values.groupRules]);
+    const updatedRules = [...formik.values.groupRules];
+    updatedRules.splice(index, 1);
+    formik.setFieldValue('groupRules', updatedRules);
     setIsDirty(true);
-    saveGroupRules(formik.values.groupRules);
+    saveGroupRules(updatedRules);
   };
 
   const updateRuleOrder = (index, change) => {
     const otherIndex = index + change;
     setMovedRule({ [index]: change > 0 ? 'down' : 'up' });
     setTimeout(() => {
-      formik.values.groupRules[index].key = otherIndex;
-      formik.values.groupRules[otherIndex].key = index;
-      formik.setFieldValue(
-        'groupRules',
-        [...formik.values.groupRules].sort((a, b) => a.key - b.key)
-      );
+      const updatedRules = [...formik.values.groupRules];
+      updatedRules[index] = { ...updatedRules[index], key: otherIndex };
+      updatedRules[otherIndex] = { ...updatedRules[otherIndex], key: index };
+      updatedRules.sort((a, b) => a.key - b.key);
+
+      formik.setFieldValue('groupRules', updatedRules);
       setIsDirty(true);
       setMovedRule({});
-      saveGroupRules(formik.values.groupRules);
+      saveGroupRules(updatedRules);
     }, 100);
   };
 
@@ -452,6 +453,7 @@ const RuleForm = (props) => {
       saveGroupRules(formik.values.groupRules);
       setBulkValue(formik.values.groupRules.map(ruleToText).join('\n'));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.groupRules]);
 
   useEffect(() => {
@@ -459,6 +461,7 @@ const RuleForm = (props) => {
     chrome.commands.onCommand.addListener(toggleCollapseListener);
     return () =>
       chrome.commands.onCommand.removeListener(toggleCollapseListener);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (showConfirm) {

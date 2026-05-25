@@ -45,7 +45,7 @@ const getRuleForTabGroup = async (tabGroupId) => {
   );
   const match = windowGroupEntries.find(([k, v]) => v === tabGroupId);
   if (match) {
-    const [k, v] = match;
+    const [k] = match;
     const ruleId = k
       .replace(new RegExp('window:.*:rule:'), '')
       .replace(':groupId', '');
@@ -124,14 +124,6 @@ const setGroupIdForRule = async (rule, windowId, groupId) => {
   await localStorage.set(key, groupId);
 };
 
-const getActiveGroupIds = async (windowId) => {
-  const rules = await getGroupRules();
-  const groupIds = await Promise.all(
-    rules.map((r) => getGroupIdForRule(windowId, r))
-  );
-  return groupIds.filter((gId) => !!gId) || [];
-};
-
 const assignAllTabsInWindow = async () => {
   const tabs = await chrome.tabs.query({ status: 'complete' });
   const window = await getCurrentWindow();
@@ -161,7 +153,7 @@ const clearOldEntries = async () => {
     ([k, v]) => !rules.some((r) => k.includes(`rule:${r.id}:groupId`))
   );
 
-  for (const [k, groupId] of oldRuleGroupEntries) {
+  for (const [, groupId] of oldRuleGroupEntries) {
     const tabs = await new Promise((resolve) => chrome.tabs.query({}, resolve));
     const tabsStillInGroup = tabs.filter((t) => t.groupId === groupId);
     for (const tab of tabsStillInGroup) {
@@ -275,7 +267,7 @@ const handleTab = async (tabId, retryCount = 3) => {
   } catch (e) {
     // Extra retry logic for dealing with cases where a tab is still being dragged by user
     const isTabMoveError =
-      e.message ==
+      e.message ===
       'Tabs cannot be edited right now (user may be dragging a tab).';
     if (isTabMoveError && retryCount > 0) {
       const delay = 250 * retryCount;
@@ -307,7 +299,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     // We'll let it stay for the lifetime of the tab session as clarified.
   }
 
-  if (changeInfo.url || changeInfo.groupId == -1) {
+  if (changeInfo.url || changeInfo.groupId === -1) {
     handleTab(tabId);
   }
 });

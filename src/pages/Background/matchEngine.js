@@ -8,7 +8,7 @@ export const matchRuleShort = (pattern) => {
   // Always case-insensitive internally
   let regexStr = pattern.toLowerCase();
   // Escape regex control characters except * and .
-  regexStr = regexStr.replace(/([+?^=!:${}()|\[\]\\/])/g, '\\$1');
+  regexStr = regexStr.replace(/([+?^=!:${}()|[\]\\/])/g, '\\$1');
 
   // Rule definitions based on spec:
   // If pattern contains / -> treat as URL
