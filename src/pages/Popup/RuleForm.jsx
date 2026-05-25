@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled, { css } from 'styled-components';
-import formik, { Formik, Field, Form, useFormik, FieldArray } from 'formik';
+import { useFormik } from 'formik';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DoneIcon from '@material-ui/icons/Check';
@@ -11,38 +11,27 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import EditIcon from '@material-ui/icons/Edit';
-
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
-
 import ClearAllIcon from '@material-ui/icons/ClearAll';
 import SortIcon from '@material-ui/icons/Sort';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import Fab from '@material-ui/core/Fab';
 import Tooltip from '@material-ui/core/Tooltip';
-import Draggable, { DraggableCore } from 'react-draggable';
-import { COLORS } from '../Colors';
-
-import TabDemo from './TabDemo';
-
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-import './Popup.css';
+import { COLORS } from '../Colors';
+import TabDemo from './TabDemo';
 import EmojiModal from './EmojiModal';
+import './Popup.css';
 
 const TABSENSE_BLUE = '#2196f3';
-const TABSENSE_ORANGE = '#fa7312';
 const TABSENSE_RED = '#fb4453';
-const TABSENSE_PURPLE = '#7312fa';
 const DARK_BLUE = '#282C34';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 600px; /* Forces the Chrome popup to open at its maximum allowed height */
-  max-height: 100vh;
+  height: 100%; 
   width: 100%;
   overflow: hidden;
   background-color: ${DARK_BLUE};
@@ -77,19 +66,17 @@ const Wrapper = styled.div`
 
   .reaction {
     position: absolute;
-    overflow: visible;
-    width: 1rem;
-    height: 1rem;
-    align-self: flex-end;
-    margin-left: 6.5rem;
-    padding-bottom: 0.5rem;
+    left: 7.5rem; 
+    bottom: 1.5rem;
+    width: 1.1rem;
+    height: 1.1rem;
     z-index: 10;
     color: #626c7f;
+    transition: color 150ms;
 
     &:hover {
       cursor: pointer;
-      opacity: 0.9;
-      color: inherit;
+      color: ${TABSENSE_BLUE};
     }
   }
 
@@ -115,33 +102,6 @@ const Wrapper = styled.div`
     }
   }
 
-  .MuiButton-root.expandable {
-    justify-content: flex-start;
-
-    .MuiButton-label > div {
-      overflow: hidden;
-      transition: max-width 150ms;
-      white-space: nowrap;
-      text-align: left;
-      max-width: 0;
-    }
-  }
-
-  .MuiButton-root.expandable:hover {
-    .MuiButton-label > div {
-      max-width: 10rem;
-    }
-  }
-
-  .bottom-row {
-    opacity: 0.2;
-    transition: opacity 75ms ease-in;
-  }
-
-  .bottom-row--show {
-    opacity: 1;
-  }
-
   .moving {
     transition: transform 75ms ease-in-out;
     transform: translate(0, 5px);
@@ -153,10 +113,6 @@ const Wrapper = styled.div`
 
   .moving--down {
     transform: translate(0, 2rem);
-  }
-
-  .moving--fade {
-    opacity: 0;
   }
 
   .moving--indirect {
@@ -197,10 +153,6 @@ const Separator = styled.div`
   margin: 0 0.25rem;
 `;
 
-const PreCol = styled.div`
-  width: 6rem;
-`;
-
 const PostCol = styled.div`
   width: 7rem;
   display: flex;
@@ -209,31 +161,13 @@ const PostCol = styled.div`
   position: relative;
 `;
 
-const Icon = styled.div`
-  cursor: pointer;
-  color: #f1f1f1;
-  &:hover {
-    color: ${TABSENSE_BLUE};
-  }
-
-  ${(props) =>
-    props.disabled &&
-    css`
-      cursor: initial;
-
-      &:hover {
-        color: inherit;
-      }
-    `}
-`;
-
 const Row = styled.div`
+  position: relative; /* REQUIRED to anchor absolute elements like the reaction icon */
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: ${(props) => props.alignItems || 'center'};
-  justify-content: ${(props) => props.justifyContent || 'initial'};
   padding: ${(props) => props.padding || '0'};
 
   ${(props) =>
@@ -321,14 +255,29 @@ const isAnyTabSenseGroupCollapsed = async () => {
   return collapsedGroups.length > 0;
 };
 
-const TAB_BORDER_COLOR = '#9a9a9a';
-
 const ruleToText = (rule) =>
-  `${rule.name}, ${rule.pattern.replace('\n', '   ')}${rule.color ? ', ' + rule.color : ''
-  }`;
+  `${rule.name}, ${rule.pattern.replace('\n', '   ')}${rule.color ? ', ' + rule.color : ''}`;
 
 const RuleForm = (props) => {
   const fileInputRef = useRef(null);
+
+  const {
+    groupRules,
+    saveGroupRules,
+    handleCollapseGroups,
+    showConfirm,
+    handleConfirm,
+  } = props;
+
+  const [isDirty, setIsDirty] = useState(false);
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [bulkValue, setBulkValue] = useState(
+    groupRules.map(ruleToText).join('\n')
+  );
+  const [newestRule, setNewestRule] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [movedRule, setMovedRule] = useState({});
+  const [showEmojiRow, setShowEmojiRow] = useState(null);
 
   const handleExport = () => {
     const rulesToExport = {
@@ -375,25 +324,6 @@ const RuleForm = (props) => {
     reader.readAsText(file);
   };
 
-  const {
-    groupRules,
-    saveGroupRules,
-    handleUpdate,
-    handleCollapseGroups,
-    showConfirm,
-    handleConfirm,
-  } = props;
-  const [isDirty, setIsDirty] = useState(false);
-  const [isBulkMode, setIsBulkMode] = useState(false);
-  const [bulkValue, setBulkValue] = useState(
-    groupRules.map(ruleToText).join('\n')
-  );
-  const [newestRule, setNewestRule] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showBottomRow, setShowBottomRow] = useState(false);
-  const [movedRule, setMovedRule] = useState({});
-  const [showEmojiRow, setShowEmojiRow] = useState(null);
-
   const formik = useFormik({
     initialValues: {
       groupRules,
@@ -405,7 +335,7 @@ const RuleForm = (props) => {
 
   const removeRule = (index) => {
     formik.values.groupRules.splice(index, 1);
-    formik.setFieldValue(formik.values.groupRules);
+    formik.setFieldValue('groupRules', [...formik.values.groupRules]);
     setIsDirty(true);
     saveGroupRules(formik.values.groupRules);
   };
@@ -417,7 +347,8 @@ const RuleForm = (props) => {
       formik.values.groupRules[index].key = otherIndex;
       formik.values.groupRules[otherIndex].key = index;
       formik.setFieldValue(
-        formik.values.groupRules.sort((a, b) => a.key - b.key)
+        'groupRules',
+        [...formik.values.groupRules].sort((a, b) => a.key - b.key)
       );
       setIsDirty(true);
       setMovedRule({});
@@ -448,25 +379,32 @@ const RuleForm = (props) => {
       key: formik.values.groupRules.length,
       color: getNewColor(),
     };
-    formik.setFieldValue(formik.values.groupRules.push(newRule));
-    setNewestRule(formik.values.groupRules.length);
+    formik.setFieldValue('groupRules', [...formik.values.groupRules, newRule]);
+    setNewestRule(formik.values.groupRules.length + 1);
   };
 
   const handleEmojiSelection = (index, emoji) => {
-    formik.values.groupRules[index].name =
-      emoji + ' ' + formik.values.groupRules[index].name;
+    // FIX: Clone the array to avoid direct state mutation
+    const updatedRules = [...formik.values.groupRules];
+    updatedRules[index] = {
+      ...updatedRules[index],
+      name: emoji + ' ' + updatedRules[index].name
+    };
+
+    // Explicitly set the new field value
+    formik.setFieldValue('groupRules', updatedRules);
     setShowEmojiRow(null);
     setIsDirty(true);
-    saveGroupRules(formik.values.groupRules);
+    saveGroupRules(updatedRules);
   };
 
   const allowUp = (index) => index > 0;
   const allowDown = (index) =>
     index < (formik.values.groupRules && formik.values.groupRules.length - 1);
+
   const allValid = formik.values.groupRules.every(
     (rule) => rule.name.length > 0 && rule.pattern.length > 0
   );
-  const changed = formik.dirty || isDirty;
 
   const textToRules = (rawText) => {
     const lines = rawText.split('\n');
@@ -475,6 +413,7 @@ const RuleForm = (props) => {
       .filter((r) => !!r);
     return rules;
   };
+
   const lineToRule = (text, key) => {
     const fields = text.split(',').map((f) => f.replace('   ', '\n').trim());
     if (text.trim().length === 0) return null;
@@ -509,7 +448,7 @@ const RuleForm = (props) => {
   };
 
   useEffect(() => {
-    if (allValid) {
+    if (allValid && (formik.dirty || isDirty)) {
       saveGroupRules(formik.values.groupRules);
       setBulkValue(formik.values.groupRules.map(ruleToText).join('\n'));
     }
@@ -517,7 +456,6 @@ const RuleForm = (props) => {
 
   useEffect(() => {
     updateCollapsed();
-    setTimeout(() => setShowBottomRow(true), 10);
     chrome.commands.onCommand.addListener(toggleCollapseListener);
     return () =>
       chrome.commands.onCommand.removeListener(toggleCollapseListener);
@@ -530,7 +468,7 @@ const RuleForm = (props) => {
   if (isBulkMode) {
     const parsedRules = textToRules(bulkValue);
     const isBulkValid = parsedRules.every((r) => !r.error);
-    const confirmBulk = (rules) => {
+    const confirmBulk = () => {
       if (!isBulkValid) return;
       saveGroupRules(parsedRules, true);
       setIsBulkMode(false);
@@ -573,18 +511,17 @@ const RuleForm = (props) => {
       return movedRule[i];
     }
 
-    if (movedRule[i - 1] == 'down') {
+    if (movedRule[i - 1] === 'down') {
       if (i === 1) return 'fade';
       return 'up';
     }
-    if (movedRule[i + 1] == 'up') {
+    if (movedRule[i + 1] === 'up') {
       if (i === 0) return 'fade';
       return 'down';
     }
   };
 
   const indirectlyMoved = (i) => getMove(i) && !movedRule[i];
-
   const shouldShowLabel = (i) => i === 0;
 
   return (
@@ -686,11 +623,10 @@ const RuleForm = (props) => {
           <Row
             className={
               getMove(i)
-                ? `moving moving--${getMove(i)} ${indirectlyMoved(i) ? 'moving--indirect' : ''
-                }`
+                ? `moving moving--${getMove(i)} ${indirectlyMoved(i) ? 'moving--indirect' : ''}`
                 : ''
             }
-            key={groupRule.key || '0'}
+            key={groupRule.key || i.toString()}
             alignItems="flex-end"
             style={{ paddingLeft: '1rem', paddingBottom: '1rem', paddingRight: '0.5rem', boxSizing: 'border-box' }}
           >
@@ -747,7 +683,7 @@ const RuleForm = (props) => {
               )}
             >
               {Object.entries(COLORS).map(([colorKey, colorVal]) => (
-                <MenuItem value={colorKey}>
+                <MenuItem key={colorKey} value={colorKey}>
                   <ColorCircle value={colorVal} />
                 </MenuItem>
               ))}
