@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import './Fix';
